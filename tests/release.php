@@ -14,8 +14,8 @@ if ($snapshot) {
         $itunes = $item->children('itunes', true);
         $number = (int)$itunes->episode;
         $expected_episodes[$number] = [
-            'title' => (string)$item->title . ' – Bo Møller showet',
-            'image' => $seed_episodes[(string)$number]['thumbnail'] ?? '',
+            'title' => (string)$item->title . ' - Bo Møller showet',
+            'image' => 'https://bomoeller.dk/assets/social/episode-' . $number . '.jpg',
         ];
     }
 }
@@ -63,7 +63,8 @@ check(strpos($home['body'], 'Bo Møller er dansk') === false && strpos($home['bo
 check(strpos($home['body'], 'Jeg bruger AI. Helt åbent.') !== false && strpos($home['body'], 'human_in_the_loop = true') !== false, 'AI-transparenssektionen mangler');
 check(strpos($home['body'], "\u{2014}") === false && stripos($home['body'], '&' . 'mdash;') === false, 'Forsiden indeholder stadig en em-dash');
 check(strpos($home['body'], '/assets/hosts/bo-moeller.webp') !== false, 'Det nye Bo-portræt mangler');
-check(strpos($home['body'], '/assets/bo-avatar.jpg') !== false, 'YouTube-profilbilledet bruges ikke som logo og favicon');
+check(strpos($home['body'], '/assets/icons/avatar-96.webp') !== false && strpos($home['body'], '/favicon.ico') !== false, 'YouTube-profilbilledet bruges ikke som logo og favicon');
+check(meta_property($home['body'], 'og:image') === 'https://bomoeller.dk/assets/social/home.jpg', 'Forsiden bruger ikke sit dedikerede social card');
 check(strpos($home['body'], 'Ærlige samtaler om at bygge, drive og sælge softwarevirksomheder') === false, 'Gammel podcastbranding lækker i forsiden');
 check(strpos($home['body'], 'https://saaskøbmænd.dk') !== false, 'Link til SaaS Købmænd mangler i Bo-biografien');
 check(strpos($home['body'], 'https://langsom.com') !== false, 'Link til Langsom mangler i Bo-biografien');
@@ -74,12 +75,17 @@ check(strpos($home['body'], '</html>') !== false, 'HTML-outputtet er afkortet');
 
 $episode_four = request_path('/episode/4-skal-man-have-en-co-founder');
 check($episode_four['status'] === 200, 'Episode 4 svarer ikke 200');
-check(meta_property($episode_four['body'], 'og:title') === 'Skal man have en co-founder? – Bo Møller showet', 'Episode 4 har forkert OG-titel');
-check(meta_property($episode_four['body'], 'og:image') === 'https://i.ytimg.com/vi/EsDzRsIDTBU/hqdefault.jpg', 'Episode 4 har forkert OG-image');
-check(meta_property($episode_four['body'], 'og:image:width') === '480', 'Episode 4 har forkert OG-billedbredde');
-check(meta_property($episode_four['body'], 'og:image:height') === '360', 'Episode 4 har forkert OG-billedhøjde');
+check(meta_property($episode_four['body'], 'og:title') === 'Skal man have en co-founder? - Bo Møller showet', 'Episode 4 har forkert OG-titel');
+check(meta_property($episode_four['body'], 'og:image') === 'https://bomoeller.dk/assets/social/episode-4.jpg', 'Episode 4 har forkert OG-image');
+check(meta_property($episode_four['body'], 'og:image:width') === '1200', 'Episode 4 har forkert OG-billedbredde');
+check(meta_property($episode_four['body'], 'og:image:height') === '630', 'Episode 4 har forkert OG-billedhøjde');
 check(strpos($episode_four['body'], 'VideoObject') !== false, 'Episode 4 mangler VideoObject-schema');
 check(strpos($episode_four['body'], 'AudioObject') !== false, 'Episode 4 mangler AudioObject-schema');
+check(strpos($episode_four['body'], 'class="video-embed"') !== false && strpos($episode_four['body'], 'loading="lazy"') !== false, 'Episodevideoen er ikke crawlbar og lazy-loaded');
+check(strpos($episode_four['body'], 'preload="metadata"') !== false, 'Lydafspilleren henter ikke metadata');
+check(strpos($episode_four['body'], 'Det får jeg talt om') !== false && strpos($episode_four['body'], 'Kapitler') !== false, 'Det redaktionelle episodeindhold mangler');
+check(strpos($episode_four['body'], 'onclick=') === false, 'Inline JavaScript forhindrer en stram CSP');
+check(strpos($episode_four['body'], 'class="hosts-bio"') === false && strpos($episode_four['body'], 'class="subpage-note"') !== false, 'Episodesiden bruger ikke det kompakte afslutningsmodul');
 
 $host = request_path('/vaert/bo-moeller');
 check($host['status'] === 200 && strpos($host['body'], 'serieiværksætter') !== false, 'Bos værtsside virker ikke');
@@ -97,6 +103,7 @@ $sitemap_urls = $sitemap_matches[1];
 $episode_urls = array_values(array_filter($sitemap_urls, function ($url) { return strpos($url, '/episode/') !== false; }));
 check(count($episode_urls) === 4, 'Sitemap indeholder ikke alle episodesider');
 check(count($sitemap_urls) === 6, 'Sitemap mangler forside eller værtsside');
+check(strpos($sitemap['body'], 'xmlns:video=') !== false && substr_count($sitemap['body'], '<video:video>') === 4, 'Video-sitemapdata mangler');
 
 $rendered_titles = [];
 $rendered_images = [];

@@ -12,6 +12,7 @@ $series_description = $config['series_description'];
 $hosts = $config['hosts'];
 $platforms = $config['platforms'];
 $platform_profiles = array_values($platforms);
+$editorial_by_episode = require dirname(__DIR__) . '/config/episode-content.php';
 
 // ===== Hjælpefunktioner =====
 function dk_slugify($str) {
@@ -168,7 +169,16 @@ function teaser($html, $limit, $ellipsis = true) {
     $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $text = trim(preg_replace('/\s+/', ' ', $text));
     if (mb_strlen($text, 'UTF-8') <= $limit) return $text;
-    return mb_substr($text, 0, $limit, 'UTF-8') . ($ellipsis ? '…' : '');
+    $slice = mb_substr($text, 0, $limit + 1, 'UTF-8');
+    // Klip aldrig midt i et ord. Foretræk desuden en afsluttet sætning, når
+    // den fylder mindst ca. halvdelen af den ønskede meta-beskrivelse.
+    if (preg_match_all('/^.{40,}?[.!?](?=\s|$)/u', $slice, $sentences) && !empty($sentences[0])) {
+        $candidate = end($sentences[0]);
+        if (mb_strlen($candidate, 'UTF-8') >= (int)($limit * .55)) return trim($candidate);
+    }
+    $slice = mb_substr($slice, 0, $limit, 'UTF-8');
+    $slice = preg_replace('/\s+\S*$/u', '', $slice);
+    return rtrim($slice, " \t\n\r\0\x0B,;:-") . ($ellipsis ? '…' : '');
 }
 // Podcast-feedet kan indeholde typografiske em-dashes som tegn eller entitet.
 // Sitet bruger konsekvent den almindelige bindestreg i al synlig tekst.
@@ -622,6 +632,7 @@ foreach ($rss->channel->item as $item) {
     }
 
     $episode_content = $content_encoded ?: $desc_raw;
+    $editorial = $editorial_by_episode[$ep_no] ?? [];
 
     $short_title = short_title_for_slug($title);
     $base_slug = $ep_no ? ($ep_no . '-' . $short_title) : $short_title;
@@ -647,6 +658,9 @@ foreach ($rss->channel->item as $item) {
         'youtube_views' => $youtube ? $youtube['views'] : 0,
         'youtube_published' => $youtube ? $youtube['published_iso'] : null,
         'topics'      => episode_topics($title, $episode_content),
+        'summary'     => (string)($editorial['summary'] ?? ''),
+        'points'      => (array)($editorial['points'] ?? []),
+        'chapters'    => (array)($editorial['chapters'] ?? []),
         'idx'         => $idx,
     ];
     $slug_to_index[$slug] = $idx;
@@ -712,7 +726,8 @@ if (preg_match('#^/sitemap\.xml$#', $request_uri)) {
 
     echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"' .
-         ' xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
+         ' xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"' .
+         ' xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">' . "\n";
 
     echo '  <url>' . "\n";
     echo '    <loc>' . htmlspecialchars($base . '/', ENT_XML1) . '</loc>' . "\n";
@@ -750,6 +765,18 @@ if (preg_match('#^/sitemap\.xml$#', $request_uri)) {
             echo '      <image:loc>' . htmlspecialchars($sitemap_image, ENT_XML1) . '</image:loc>' . "\n";
             echo '      <image:title>' . htmlspecialchars($ep['title'], ENT_XML1) . '</image:title>' . "\n";
             echo '    </image:image>' . "\n";
+        }
+        if (!empty($ep['youtube_id']) && !empty($ep['youtube_thumbnail'])) {
+            $video_description = $ep['summary'] ?: teaser($ep['content'], 300);
+            echo '    <video:video>' . "\n";
+            echo '      <video:thumbnail_loc>' . htmlspecialchars($ep['youtube_thumbnail'], ENT_XML1) . '</video:thumbnail_loc>' . "\n";
+            echo '      <video:title>' . htmlspecialchars($ep['title'], ENT_XML1) . '</video:title>' . "\n";
+            echo '      <video:description>' . htmlspecialchars($video_description, ENT_XML1) . '</video:description>' . "\n";
+            echo '      <video:player_loc>' . htmlspecialchars('https://www.youtube.com/embed/' . $ep['youtube_id'], ENT_XML1) . '</video:player_loc>' . "\n";
+            if (!empty($ep['duration_s'])) echo '      <video:duration>' . (int)$ep['duration_s'] . '</video:duration>' . "\n";
+            if (!empty($ep['date_iso_full'])) echo '      <video:publication_date>' . htmlspecialchars($ep['date_iso_full'], ENT_XML1) . '</video:publication_date>' . "\n";
+            echo '      <video:family_friendly>yes</video:family_friendly>' . "\n";
+            echo '    </video:video>' . "\n";
         }
         echo '  </url>' . "\n";
     }
@@ -852,12 +879,13 @@ if ($path === '' || $path === '/') {
 }
 
 // ===== SEO / OG =====
-$page_title = $site_name . ' – tanker på farten';
+$page_title = $site_name . ' - podcast om tech, business og livet';
 $page_description = $series_description;
 $page_url = rtrim($site_url, '/') . '/';
-$og_image = $cover_image;
-$og_image_width = 1400;
-$og_image_height = 1400;
+$home_social_image = '/assets/social/home.jpg';
+$og_image = is_file(__DIR__ . $home_social_image) ? rtrim($site_url, '/') . $home_social_image : $cover_image;
+$og_image_width = is_file(__DIR__ . $home_social_image) ? 1200 : 1400;
+$og_image_height = is_file(__DIR__ . $home_social_image) ? 630 : 1400;
 $social_title = null;
 
 $single = null; $prev_link = null; $prev_label = null; $next_link = null; $next_label = null;
@@ -866,17 +894,17 @@ if ($is_single) {
     $i = $slug_to_index[$requested_slug];
     $single = $episodes[$i];
 
-    $page_title = teaser($single['title'], 52) . ' – ' . $site_name;
-    $social_title = $single['title'] . ' – ' . $site_name;
-    $page_description = teaser($single['content'], 160);
+    $page_title = teaser($single['title'], 52) . ' - ' . $site_name;
+    $social_title = $single['title'] . ' - ' . $site_name;
+    $page_description = $single['summary'] ? teaser($single['summary'], 160) : teaser($single['content'], 160);
     $page_url = rtrim($site_url, '/') . '/episode/' . rawurlencode($single['slug']);
 
-    $og_image = !empty($single['youtube_thumbnail'])
-        ? $single['youtube_thumbnail']
-        : (!empty($single['image']) ? $single['image'] : $cover_image);
-    if (!empty($single['youtube_thumbnail'])) {
-        list($og_image_width, $og_image_height) = youtube_thumbnail_dimensions($single['youtube_thumbnail']);
-    }
+    $episode_social_image = '/assets/social/episode-' . (int)$single['ep_no'] . '.jpg';
+    $og_image = is_file(__DIR__ . $episode_social_image)
+        ? rtrim($site_url, '/') . $episode_social_image
+        : (!empty($single['youtube_thumbnail']) ? $single['youtube_thumbnail'] : ($single['image'] ?: $cover_image));
+    if (is_file(__DIR__ . $episode_social_image)) { $og_image_width = 1200; $og_image_height = 630; }
+    elseif (!empty($single['youtube_thumbnail'])) list($og_image_width, $og_image_height) = youtube_thumbnail_dimensions($single['youtube_thumbnail']);
 
     $curr_no = (int)$single['ep_no'];
     $lower = null; $higher = null;
@@ -890,14 +918,14 @@ if ($is_single) {
     if ($lower) { $prev_link  = '/episode/' . htmlspecialchars($lower['slug']);  $prev_label = '← Episode ' . (int)$lower['ep_no']; }
     if ($higher){ $next_link  = '/episode/' . htmlspecialchars($higher['slug']); $next_label = 'Episode ' . (int)$higher['ep_no'] . ' →'; }
 } elseif ($is_host && $host_profile) {
-    $page_title = 'Om mig – ' . $site_name;
+    $page_title = 'Bo Møller - iværksætter, investor og podcastvært';
     $page_description = teaser($host_profile['long_bio'], 160);
     $page_url = rtrim($site_url, '/') . '/vaert/' . rawurlencode($host_profile['slug']);
     $og_image = rtrim($site_url, '/') . $host_profile['image'];
     $og_image_width = (int)$host_profile['image_width'];
     $og_image_height = (int)$host_profile['image_height'];
 } elseif ($is_404) {
-    $page_title = '404 – Siden findes ikke · ' . $site_name;
+    $page_title = '404 - Siden findes ikke · ' . $site_name;
     $page_description = "Jeg kan ikke finde den side. Måske leder du efter en af mine podcast-episoder?";
     // $page_url bevares som forsiden (default) – en 404 skal ikke kanonisere til sig selv.
 }
@@ -1092,11 +1120,14 @@ if ($ld_graph) {
     <?php if ($is_single && $prev_link): ?><link rel="prev" href="<?= $prev_link ?>"><?php endif; ?>
     <?php if ($is_single && $next_link): ?><link rel="next" href="<?= $next_link ?>"><?php endif; ?>
 
-    <link rel="icon" href="/assets/bo-avatar.jpg?v=1" type="image/jpeg">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/assets/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="/assets/icons/favicon-96.png" type="image/png" sizes="96x96">
+    <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" sizes="180x180">
     <link rel="manifest" href="/site.webmanifest">
     <?php if ($youtube_videos): ?><link rel="preconnect" href="https://i.ytimg.com" crossorigin><?php endif; ?>
     <?php if ($cover_image): ?><link rel="preconnect" href="https://d3t3ozftmdmh3i.cloudfront.net" crossorigin><?php endif; ?>
-    <meta name="theme-color" content="#101214">
+    <meta name="theme-color" content="#080909">
 
     <!-- Podcast-feed (gør RSS-feedet synligt for feed-læsere og podcast-crawlere) -->
     <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($site_name) ?>" href="<?= htmlspecialchars($public_rss_url) ?>">
@@ -1301,14 +1332,14 @@ if ($ld_graph) {
         }
     </style>
     <?php endif; ?>
-    <link rel="stylesheet" href="/assets/site-v2.css?v=12">
+    <link rel="stylesheet" href="/assets/site-v2.css?v=13">
 
 </head>
 <body>
 <div class="site-shell">
   <header class="site-header">
-    <a class="brand" href="/" aria-label="<?= htmlspecialchars($site_name) ?> – forside">
-      <img class="brand-mark" src="/assets/bo-avatar.jpg" width="42" height="42" alt="">
+    <a class="brand" href="/" aria-label="<?= htmlspecialchars($site_name) ?> - forside">
+      <img class="brand-mark" src="/assets/icons/avatar-96.webp" width="42" height="42" alt="">
       <span>BO MØLLER <em>/ SHOWET</em></span>
     </a>
     <nav class="site-nav" aria-label="Hovednavigation">
@@ -1370,10 +1401,7 @@ if ($ld_graph) {
 
       <?php if (!empty($single['youtube_id'])): ?>
       <div class="single-video">
-        <button class="video-facade" type="button" data-video-id="<?= htmlspecialchars($single['youtube_id']) ?>" data-video-title="<?= htmlspecialchars($single['title']) ?>" aria-label="Afspil <?= htmlspecialchars($single['title']) ?>">
-          <img src="<?= htmlspecialchars($single['youtube_thumbnail']) ?>" srcset="<?= htmlspecialchars(youtube_thumbnail_srcset($single['youtube_id'], $single['youtube_thumbnail'])) ?>" sizes="(max-width: 940px) calc(100vw - 32px), 892px" width="1280" height="720" fetchpriority="high" alt="">
-          <span class="play-button" aria-hidden="true">▶</span>
-        </button>
+        <iframe class="video-embed" src="<?= htmlspecialchars('https://www.youtube-nocookie.com/embed/' . $single['youtube_id'] . '?rel=0') ?>" title="<?= htmlspecialchars($single['title']) ?>" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
       <?php elseif (!empty($single['image'])): ?>
       <div class="single-video"><div class="audio-visual"><img src="<?= htmlspecialchars($single['image']) ?>" width="600" height="600" alt="Cover for <?= htmlspecialchars($single['title']) ?>"><span class="audio-only-badge">♪ Denne episode er tilgængelig som lyd</span></div></div>
@@ -1381,27 +1409,44 @@ if ($ld_graph) {
 
       <div class="single-audio">
         <span class="single-audio-label">Lyt som podcast</span>
-        <?php if (!empty($single['audio_url'])): ?><audio controls preload="none"><source src="<?= htmlspecialchars($single['audio_url']) ?>" type="audio/mpeg">Din browser understøtter ikke afspilning.</audio><?php endif; ?>
+        <?php if (!empty($single['audio_url'])): ?><audio controls preload="metadata"><source src="<?= htmlspecialchars($single['audio_url']) ?>" type="audio/mpeg">Din browser understøtter ikke afspilning.</audio><?php endif; ?>
         <nav class="platform-links" aria-label="Lyt på platforme">
           <?php foreach ($platforms as $name => $url): ?><a class="pill" href="<?= htmlspecialchars($url) ?>" target="_blank" rel="noopener"><?= htmlspecialchars(strtok($name, ' ')) ?></a><?php endforeach; ?>
         </nav>
       </div>
 
       <?php $share_link = rtrim($short_url, '/') . '/e/' . (int)$single['ep_no']; ?>
-      <div class="share-row"><span>Del episoden:</span><span class="share-url"><?= htmlspecialchars(preg_replace('#^https?://#', '', $share_link)) ?></span><button type="button" class="copy-btn" data-link="<?= htmlspecialchars($share_link) ?>" onclick="copyShareLink(this)">Kopiér link</button></div>
+      <div class="share-row"><span>Del episoden:</span><span class="share-url"><?= htmlspecialchars(preg_replace('#^https?://#', '', $share_link)) ?></span><button type="button" class="copy-btn" data-copy-link="<?= htmlspecialchars($share_link) ?>">Kopiér link</button></div>
 
       <div class="episode-content-wrap">
         <div>
           <div class="content-label">Om episoden</div>
           <div class="content">
+            <?php if ($single['summary']): ?><p class="episode-summary"><?= htmlspecialchars($single['summary']) ?></p><?php endif; ?>
             <?php
               $has_html = $single['content'] !== '' && $single['content'] !== strip_tags($single['content']);
               if ($has_html) echo sanitize_episode_html($single['content']);
               else echo nl2br(htmlspecialchars(html_entity_decode(trim($single['content']), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
             ?>
+            <?php if ($single['points']): ?>
+            <section class="episode-notes" aria-labelledby="points-title">
+              <h2 id="points-title">Det får jeg talt om</h2>
+              <ul><?php foreach ($single['points'] as $point): ?><li><?= htmlspecialchars($point) ?></li><?php endforeach; ?></ul>
+            </section>
+            <?php endif; ?>
+            <?php if ($single['chapters'] && !empty($single['youtube_id'])): ?>
+            <section class="episode-notes" aria-labelledby="chapters-title">
+              <h2 id="chapters-title">Kapitler</h2>
+              <ol class="chapter-list">
+                <?php foreach ($single['chapters'] as $chapter): $parts = array_map('intval', explode(':', $chapter[0])); $seconds = count($parts) === 2 ? $parts[0] * 60 + $parts[1] : 0; ?>
+                <li><a href="<?= htmlspecialchars('https://www.youtube.com/watch?v=' . $single['youtube_id'] . '&t=' . $seconds . 's') ?>" target="_blank" rel="noopener"><time><?= htmlspecialchars($chapter[0]) ?></time><span><?= htmlspecialchars($chapter[1]) ?></span></a></li>
+                <?php endforeach; ?>
+              </ol>
+            </section>
+            <?php endif; ?>
           </div>
         </div>
-        <aside class="episode-aside">
+        <aside class="episode-aside" aria-label="Fortsæt samtalen">
           <strong>Fortsæt samtalen</strong>
           <?php if (!empty($single['youtube_id'])): ?><a href="<?= htmlspecialchars('https://www.youtube.com/watch?v=' . $single['youtube_id']) ?>" target="_blank" rel="noopener">Kommentér på YouTube ↗</a><?php endif; ?>
           <a href="<?= htmlspecialchars($platforms['Spotify']) ?>" target="_blank" rel="noopener">Følg på Spotify ↗</a>
@@ -1505,10 +1550,10 @@ if ($ld_graph) {
 
   <?php if (!$is_404): ?>
     <section class="newsletter-cta" aria-label="Nyhedsbrev">
-      <div><div class="cta-title">Mine tanker, før de bliver til episoder.</div><p class="cta-desc">Få mine noter om iværksætteri, software og business direkte i indbakken.</p></div>
+      <div><h2 class="cta-title">Mine tanker, før de bliver til episoder.</h2><p class="cta-desc">Få mine noter om iværksætteri, software og business direkte i indbakken.</p></div>
       <div class="cta-buttons"><a class="cta-btn" href="<?= htmlspecialchars($hosts[0]['newsletter']) ?>" target="_blank" rel="noopener">Tilmeld dig →</a></div>
     </section>
-    <?php if (!$is_host): ?>
+    <?php if (!$is_single && !$is_host): ?>
     <section class="hosts-bio" id="om-bo" aria-labelledby="hosts-title">
       <div class="about-photo"><img src="<?= htmlspecialchars($hosts[0]['image']) ?>" width="1200" height="1200" loading="lazy" alt="Bo Møller på scenen ved Laravel Live i København"><span class="photo-credit">Billedet er taget af fotografen til Laravel Live i København · august 2026</span></div>
       <div class="about-copy"><div class="eyebrow">Lidt om mig</div><h2 id="hosts-title" class="hosts-heading">Hej, jeg er Bo.</h2>
@@ -1525,6 +1570,7 @@ if ($ld_graph) {
       </div>
     </section>
     <?php endif; ?>
+    <?php if (!$is_single && !$is_host): ?>
     <section class="ai-disclosure" aria-labelledby="ai-disclosure-title">
       <div class="ai-disclosure-label"><span aria-hidden="true">bo@showet:~$</span> disclose --ai</div>
       <div class="ai-disclosure-copy">
@@ -1532,8 +1578,14 @@ if ($ld_graph) {
         <p>Jeg har brugt AI til at bygge og deploye hele siden og til at skrive alle teksterne. Men intet er sat på autopilot: Jeg, Bo Møller, har orkestreret det hele, valgt retningen og godkendt resultatet.</p>
         <p>Alle videoer er mig, der taler - ikke AI. Endnu :-)</p>
       </div>
-      <div class="ai-disclosure-status" aria-label="Menneske i processen"><span aria-hidden="true">●</span> human_in_the_loop = true</div>
+      <div class="ai-disclosure-status" role="status" aria-label="Menneske i processen"><span aria-hidden="true">●</span> human_in_the_loop = true</div>
     </section>
+    <?php else: ?>
+    <aside class="subpage-note" aria-label="Om mig og AI på siden">
+      <p><strong>Hej, jeg er Bo.</strong> Jeg bygger virksomheder, investerer og er vært på Bo Møller showet og <a href="https://saaskøbmænd.dk" target="_blank" rel="noopener">SaaS Købmænd</a>. <a href="/vaert/bo-moeller" rel="author">Mere om mig →</a></p>
+      <p>Jeg har bygget, deployet og skrevet siden med AI - orkestreret og godkendt af mig. Videoerne er mig, ikke AI. Endnu :-)</p>
+    </aside>
+    <?php endif; ?>
   <?php endif; ?>
   </main>
   <footer class="site-footer">
@@ -1543,34 +1595,6 @@ if ($ld_graph) {
 </div>
 
 
-<script>
-// Kopiér del-link. Bruger Clipboard API i secure context (HTTPS), ellers
-// en execCommand-fallback, så knappen også virker uden HTTPS.
-function copyShareLink(btn){
-  var link = btn.getAttribute('data-link');
-  function done(){
-    var t = btn.textContent;
-    btn.textContent = 'Kopieret ✓';
-    setTimeout(function(){ btn.textContent = t; }, 1500);
-  }
-  function fallback(){
-    var ta = document.createElement('textarea');
-    ta.value = link; ta.setAttribute('readonly','');
-    ta.style.position = 'fixed'; ta.style.left = '-9999px';
-    document.body.appendChild(ta);
-    ta.select();
-    var ok = false;
-    try { ok = document.execCommand('copy'); } catch(e){}
-    document.body.removeChild(ta);
-    if (ok) done();
-  }
-  if (navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(link).then(done, fallback);
-  } else {
-    fallback();
-  }
-}
-</script>
-<script src="/assets/site-v2.js?v=1"></script>
+<script src="/assets/site-v2.js?v=2"></script>
 </body>
 </html>

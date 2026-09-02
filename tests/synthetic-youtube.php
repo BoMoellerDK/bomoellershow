@@ -40,7 +40,7 @@ synthetic_check($episode_73_path !== '', 'Episode 5 mangler en episodeside');
 
 $episode_73 = synthetic_request($episode_73_path);
 synthetic_check($episode_73['status'] === 200, 'Episode 5 svarer ikke 200');
-synthetic_check(synthetic_meta($episode_73['body'], 'og:title') === 'Episode 5: Automatiseret testepisode om video – Bo Møller showet', 'Episode 5 har forkert OG-titel');
+synthetic_check(synthetic_meta($episode_73['body'], 'og:title') === 'Episode 5: Automatiseret testepisode om video - Bo Møller showet', 'Episode 5 har forkert OG-titel');
 synthetic_check(synthetic_meta($episode_73['body'], 'og:image') === 'https://i.ytimg.com/vi/AbCdEfGhI_1/hqdefault.jpg', 'Episode 5 bruger ikke Atom-feedets eksisterende thumbnail');
 synthetic_check(synthetic_meta($episode_73['body'], 'og:image:width') === '480' && synthetic_meta($episode_73['body'], 'og:image:height') === '360', 'Episode 5 har forkerte OG-dimensioner');
 synthetic_check(strpos($episode_73['body'], 'VideoObject') !== false, 'Episode 5 mangler VideoObject-schema');
@@ -52,8 +52,8 @@ if (preg_match('#href="(/episode/4-[^"]+)"#', $home['body'], $match)) $episode_7
 synthetic_check($episode_72_path !== '', 'Den kuraterede episode 4 mangler en episodeside');
 $episode_72 = synthetic_request($episode_72_path);
 synthetic_check($episode_72['status'] === 200, 'Den kuraterede episode 4 svarer ikke 200');
-synthetic_check(synthetic_meta($episode_72['body'], 'og:image') === 'https://i.ytimg.com/vi/EsDzRsIDTBU/hqdefault.jpg', 'Atom-feedet overskriver seed-thumbnailen for episode 4');
-synthetic_check(synthetic_meta($episode_72['body'], 'og:image:width') === '480' && synthetic_meta($episode_72['body'], 'og:image:height') === '360', 'Episode 4 mistede seedets dimensioner');
+synthetic_check(synthetic_meta($episode_72['body'], 'og:image') === 'https://bomoeller.dk/assets/social/episode-4.jpg', 'Episode 4 bruger ikke sit dedikerede social card');
+synthetic_check(synthetic_meta($episode_72['body'], 'og:image:width') === '1200' && synthetic_meta($episode_72['body'], 'og:image:height') === '630', 'Episode 4 har forkerte social card-dimensioner');
 
 synthetic_check($runtime_file && is_file($runtime_file), 'Det syntetiske runtime-katalog blev ikke gemt');
 $runtime_before = $runtime_file && is_file($runtime_file) ? file_get_contents($runtime_file) : '';
