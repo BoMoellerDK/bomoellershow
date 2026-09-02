@@ -1,0 +1,73 @@
+name: Deploy til Simply.com (FTPS)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: simply-ftps-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Hent koden
+        uses: actions/checkout@v4
+
+      - name: Installér PHP 7.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring, simplexml, dom
+          coverage: none
+
+      - name: Opdatér seneste kendte RSS-feed
+        shell: bash
+        run: |
+          rss_download="$RUNNER_TEMP/podcast-rss.xml"
+          if curl --fail --location --silent --show-error --retry 2 \
+            'https://anchor.fm/s/11693a578/podcast/rss' --output "$rss_download"; then
+            if php -r '$x = @simplexml_load_file($argv[1]); exit($x && isset($x->channel->item) ? 0 : 1);' "$rss_download"; then
+              cp "$rss_download" data/podcast-rss-fallback.xml
+              echo "RSS-snapshot opdateret før deployment."
+            else
+              echo "Advarsel: Det hentede RSS-feed var ugyldigt; bruger repoets snapshot."
+            fi
+          else
+            echo "Advarsel: RSS kunne ikke hentes; bruger repoets snapshot."
+          fi
+
+      - name: Kontrollér syntaks og data
+        run: |
+          php -l public_html/index.php
+          php -r '$x = @simplexml_load_file($argv[1]); if (!$x || count($x->channel->item) < 1) { fwrite(STDERR, "RSS-snapshot er ugyldigt.\n"); exit(1); }' data/podcast-rss-fallback.xml
+          php -r '$c = json_decode(file_get_contents($argv[1]), true); $e = $c["episodes"] ?? []; $ids = array_column($e, "id"); if (count($e) < 1 || count(array_unique($ids)) !== count($e)) { fwrite(STDERR, "YouTube-kataloget skal have mindst ét unikt match.\n"); exit(1); } foreach ($ids as $id) if (!preg_match("/^[A-Za-z0-9_-]{11}$/", $id)) exit(1);' data/youtube-catalog-seed.json
+
+      - name: Kør regressionstest før deployment
+        run: bash tests/run-release.sh
+
+      - name: Upload til Simply.com via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./
+          server-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            .context/**
+            tests/**
+            **/.DS_Store
+            README.md
+            readme.md
+            MIGRATION.md
+            public_html/index.html-old
+            public_html/assets/hosts/bo-moeller.png

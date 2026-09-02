@@ -1,32 +1,52 @@
-# Bo Møller Podcast – website
+# Bo Møller showet – website
 
-Dette repo er oprettet som et selvstændigt website for Bo Møllers nye podcast.
+Et selvstændigt podcastsite for **Bo Møller showet**, bygget på den robuste
+RSS- og episodemotor fra SaaS Købmænd, men med egen konfiguration, identitet,
+indhold og testdata.
 
-Branchen \`reuse-podcast-engine\` indeholder en foreløbig kopi af den gennemprøvede
-podcast-motor fra SaaS Købmænd. Den er med vilje **ikke klar til produktion**:
-indhold, branding, feed-adresser, domæner og integrationer peger fortsat på
-SaaS Købmænd, indtil punkterne i [MIGRATION.md](MIGRATION.md) er gennemført.
+## Indhold og integrationer
 
-Der er ikke kopieret et deployment-workflow. Dermed kan starteren testes og
-tilpasses uden risiko for at uploade SaaS Købmænd-sitet til det nye webhotel.
+- Spotify for Podcasters RSS-feed med lokal fallback
+- episodeoversigt og permanente episodesider
+- lydafspiller og YouTube-video med klik-først facade
+- Spotify-, Apple Podcasts- og YouTube-links
+- sitemap, `llms.txt`, Open Graph og schema.org-data
+- lokal, kurateret sammenkobling af de første fire YouTube-episoder
 
-## Det vi genbruger
-
-- RSS-hentning, cache og fallback-snapshot
-- episodeoversigt og individuelle episode-URL'er
-- lydafspiller og valgfri YouTube-video
-- automatisk YouTube-match og permanent katalog
-- sitemap, \`llms.txt\`, Open Graph og schema.org
-- værtsprofiler, del-links og relaterede episoder
-- PHP 7.4/8.4-tests
+Podcastens identitet ligger i `config/podcast.php`. Produktionsdomænet kan
+overskrives med `BOMOELLERSHOW_SITE_URL` og `BOMOELLERSHOW_SHORT_URL`.
 
 ## Lokal test
 
-Kræver PHP 7.4+ med \`mbstring\`, \`SimpleXML\` og \`DOM\`.
+Kræver PHP 7.4+ med `mbstring`, `SimpleXML` og `DOM`.
 
-\`\`\`sh
+```sh
 bash tests/run-release.sh
-\`\`\`
+```
 
-Testene bruger det kopierede SaaS Købmænd-snapshot, indtil Bo Møller-podcastens
-feed og fixtures er sat ind.
+## Lokal forhåndsvisning
+
+```sh
+BOMOELLERSHOW_RSS_URL="file://$PWD/data/podcast-rss-fallback.xml" \
+php -S 127.0.0.1:8000 -t public_html tests/router.php
+```
+
+Åbn derefter `http://127.0.0.1:8000`.
+
+## Automatisk deployment
+
+`.github/workflows/deploy.yml` tester og deployer automatisk til Simply.com
+via FTPS ved hvert push til `main`. Workflowet kan også startes manuelt fra
+fanen Actions på GitHub.
+
+Tilføj disse tre repository secrets under `Settings -> Secrets and variables
+-> Actions` på GitHub:
+
+- `FTP_SERVER`: FTP-serveren fra Simply.com, normalt `ftp.simply.com`
+- `FTP_USERNAME`: webhotellets FTP-brugernavn
+- `FTP_PASSWORD`: webhotellets FTP-adgangskode
+
+Loginoplysningerne findes i Simply.com-kontrolpanelet under webhotellets
+`Administration -> Loginoplysninger`. Workflowet uploader repoets rod til
+FTP-roden, så `public_html`, `config` og `data` bevarer den mappestruktur,
+applikationen forventer.

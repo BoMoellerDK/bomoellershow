@@ -3,30 +3,30 @@
      xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
      xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>SaaS Købmænd – syntetisk test</title>
+    <title>Bo Møller showet – syntetisk test</title>
     <description>Deterministisk RSS-fixture til regressionstest.</description>
-    <link>https://xn--saaskbmnd-m3a9q.dk/</link>
+    <link>https://bomoeller.dk/</link>
     <language>da</language>
     <itunes:image href="https://example.com/podcast-cover.jpg"/>
     <item>
-      <title>Episode 73: Automatiseret testepisode om video</title>
+      <title>Episode 5: Automatiseret testepisode om video</title>
       <description>En ny episode, som ikke findes i seed-kataloget.</description>
-      <content:encoded><![CDATA[<p>En ny episode, som skal matches automatisk med YouTube-feedet.</p>]]></content:encoded>
+      <content:encoded><![CDATA[<p onclick="alert(1)">En ny episode, som skal matches automatisk med YouTube-feedet. <a href="javascript:alert(1)">Usikkert link</a></p>]]></content:encoded>
       <pubDate>Mon, 10 Aug 2026 05:00:00 GMT</pubDate>
-      <enclosure url="https://example.com/episode-73.mp3" length="123456" type="audio/mpeg"/>
-      <itunes:episode>73</itunes:episode>
+      <enclosure url="https://example.com/episode-5.mp3" length="123456" type="audio/mpeg"/>
+      <itunes:episode>5</itunes:episode>
       <itunes:duration>00:30:00</itunes:duration>
-      <itunes:image href="https://example.com/episode-73-cover.jpg"/>
+      <itunes:image href="https://example.com/episode-5-cover.jpg"/>
     </item>
     <item>
-      <title>Episode 72: Er du blevet træt af dit eget firma? Her er (den lovlige) løsning.</title>
-      <description>Eksisterende episode med en kurateret maxres-thumbnail.</description>
+      <title>Skal man have en co-founder?</title>
+      <description>Eksisterende episode med en kurateret thumbnail.</description>
       <content:encoded><![CDATA[<p>Feedet må ikke overskrive seed-katalogets thumbnail.</p>]]></content:encoded>
       <pubDate>Mon, 03 Aug 2026 05:00:00 GMT</pubDate>
-      <enclosure url="https://example.com/episode-72.mp3" length="123456" type="audio/mpeg"/>
-      <itunes:episode>72</itunes:episode>
+      <enclosure url="https://example.com/episode-4.mp3" length="123456" type="audio/mpeg"/>
+      <itunes:episode>4</itunes:episode>
       <itunes:duration>00:29:47</itunes:duration>
-      <itunes:image href="https://example.com/episode-72-cover.jpg"/>
+      <itunes:image href="https://example.com/episode-4-cover.jpg"/>
     </item>
   </channel>
 </rss>

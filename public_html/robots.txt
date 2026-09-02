@@ -1,4 +1,4 @@
-# robots.txt for SaaS Købmænd
+# robots.txt for Bo Møller showet
 
 # Almindelige søgemaskiner – fuld adgang
 User-agent: *
@@ -44,5 +44,5 @@ Allow: /
 User-agent: Bytespider
 Allow: /
 
-# Sitemap (kanonisk punycode-domæne)
-Sitemap: https://xn--saaskbmnd-m3a9q.dk/sitemap.xml
+# Ret domænet her, hvis produktionsdomænet bliver et andet.
+Sitemap: https://bomoeller.dk/sitemap.xml

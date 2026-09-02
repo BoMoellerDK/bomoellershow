@@ -2,12 +2,12 @@
 set -euo pipefail
 
 test_temp_dir="${RUNNER_TEMP:-/tmp}"
-runtime_file="$test_temp_dir/saaskoebmaend-youtube-runtime-test.json"
-server_log="$test_temp_dir/saaskoebmaend-php-server.log"
-rss_snapshot_file="$test_temp_dir/saaskoebmaend-rss-snapshot-test.xml"
-synthetic_runtime_file="$test_temp_dir/saaskoebmaend-youtube-runtime-synthetic.json"
-synthetic_server_log="$test_temp_dir/saaskoebmaend-php-server-synthetic.log"
-synthetic_rss_snapshot_file="$test_temp_dir/saaskoebmaend-rss-snapshot-synthetic.xml"
+runtime_file="$test_temp_dir/bomoellershow-youtube-runtime-test.json"
+server_log="$test_temp_dir/bomoellershow-php-server.log"
+rss_snapshot_file="$test_temp_dir/bomoellershow-rss-snapshot-test.xml"
+synthetic_runtime_file="$test_temp_dir/bomoellershow-youtube-runtime-synthetic.json"
+synthetic_server_log="$test_temp_dir/bomoellershow-php-server-synthetic.log"
+synthetic_rss_snapshot_file="$test_temp_dir/bomoellershow-rss-snapshot-synthetic.xml"
 fixture_root="$PWD/tests/fixtures"
 server_pids=()
 
@@ -36,28 +36,28 @@ wait_for_server() {
   fi
 }
 
-SAASKOBMAEND_YOUTUBE_RUNTIME_FILE="$runtime_file" \
-SAASKOBMAEND_YOUTUBE_FEED_URL='file:///dev/null' \
-SAASKOBMAEND_RSS_URL="file://$PWD/data/podcast-rss-fallback.xml" \
-SAASKOBMAEND_RSS_SNAPSHOT_FILE="$rss_snapshot_file" \
-SAASKOBMAEND_CACHE_NAMESPACE="release-test-$$" \
+BOMOELLERSHOW_YOUTUBE_RUNTIME_FILE="$runtime_file" \
+BOMOELLERSHOW_YOUTUBE_FEED_URL='file:///dev/null' \
+BOMOELLERSHOW_RSS_URL="file://$PWD/data/podcast-rss-fallback.xml" \
+BOMOELLERSHOW_RSS_SNAPSHOT_FILE="$rss_snapshot_file" \
+BOMOELLERSHOW_CACHE_NAMESPACE="release-test-$$" \
 php -S 127.0.0.1:8877 -t public_html tests/router.php >"$server_log" 2>&1 &
 server_pid=$!
 server_pids+=("$server_pid")
 wait_for_server 'http://127.0.0.1:8877/' "$server_log"
 
-SAASKOBMAEND_YOUTUBE_RUNTIME_FILE="$runtime_file" php tests/release.php
+BOMOELLERSHOW_YOUTUBE_RUNTIME_FILE="$runtime_file" php tests/release.php
 
-SAASKOBMAEND_RSS_URL="file://$fixture_root/synthetic-rss.xml" \
-SAASKOBMAEND_RSS_SNAPSHOT_FILE="$synthetic_rss_snapshot_file" \
-SAASKOBMAEND_YOUTUBE_FEED_URL="file://$fixture_root/synthetic-youtube.xml" \
-SAASKOBMAEND_YOUTUBE_RUNTIME_FILE="$synthetic_runtime_file" \
-SAASKOBMAEND_CACHE_NAMESPACE="synthetic-test-$$" \
+BOMOELLERSHOW_RSS_URL="file://$fixture_root/synthetic-rss.xml" \
+BOMOELLERSHOW_RSS_SNAPSHOT_FILE="$synthetic_rss_snapshot_file" \
+BOMOELLERSHOW_YOUTUBE_FEED_URL="file://$fixture_root/synthetic-youtube.xml" \
+BOMOELLERSHOW_YOUTUBE_RUNTIME_FILE="$synthetic_runtime_file" \
+BOMOELLERSHOW_CACHE_NAMESPACE="synthetic-test-$$" \
 php -S 127.0.0.1:8878 -t public_html tests/router.php >"$synthetic_server_log" 2>&1 &
 synthetic_server_pid=$!
 server_pids+=("$synthetic_server_pid")
 wait_for_server 'http://127.0.0.1:8878/' "$synthetic_server_log"
 
-SAASKOBMAEND_TEST_BASE_URL='http://127.0.0.1:8878' \
-SAASKOBMAEND_YOUTUBE_RUNTIME_FILE="$synthetic_runtime_file" \
+BOMOELLERSHOW_TEST_BASE_URL='http://127.0.0.1:8878' \
+BOMOELLERSHOW_YOUTUBE_RUNTIME_FILE="$synthetic_runtime_file" \
 php tests/synthetic-youtube.php
