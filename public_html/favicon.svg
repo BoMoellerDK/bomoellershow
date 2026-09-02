@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">SaaS Købmænd</title>
+  <desc id="desc">Et sort S flettet sammen med et orange K</desc>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="#fffaf4" stroke="#171512" stroke-width="3"/>
+  <path d="M35 14H24C16.5 14 12 18 12 24c0 6.2 4.8 9 12 9h4c6.5 0 10 3.2 10 9 0 5.8-4.8 9-13 9H12"
+        fill="none" stroke="#171512" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M38 14v36M38 33l15-17M38 33l16 17"
+        fill="none" stroke="#ff8b4d" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

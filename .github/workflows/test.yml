@@ -1,0 +1,38 @@
+name: Test website
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  release-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['7.4', '8.4']
+    steps:
+      - name: Hent koden
+        uses: actions/checkout@v4
+
+      - name: Installér PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, simplexml, dom
+          coverage: none
+
+      - name: Kontrollér syntaks og data
+        run: |
+          php -l public_html/index.php
+          php -l tests/router.php
+          php -l tests/release.php
+          php -l tests/synthetic-youtube.php
+          php -r '$x = @simplexml_load_file($argv[1]); exit($x && count($x->channel->item) >= 72 ? 0 : 1);' data/podcast-rss-fallback.xml
+          php -r 'foreach (array_slice($argv, 1) as $file) if (!@simplexml_load_file($file)) exit(1);' tests/fixtures/synthetic-rss.xml tests/fixtures/synthetic-youtube.xml
+          php -r '$c = json_decode(file_get_contents($argv[1]), true); $e = $c["episodes"] ?? []; $ids = array_column($e, "id"); exit(count($e) >= 72 && count(array_unique($ids)) === count($e) ? 0 : 1);' data/youtube-catalog-seed.json
+
+      - name: Kør regressionstest
+        run: bash tests/run-release.sh

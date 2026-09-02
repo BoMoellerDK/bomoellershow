@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:yt="http://www.youtube.com/xml/schemas/2015"
+      xmlns:media="http://search.yahoo.com/mrss/">
+  <title>SaaS Købmænd – syntetisk test</title>
+  <entry>
+    <id>yt:video:AbCdEfGhI_1</id>
+    <yt:videoId>AbCdEfGhI_1</yt:videoId>
+    <yt:channelId>UCEPkljgNMsbW3lNYZ-j6VHw</yt:channelId>
+    <title>Episode 73: Automatiseret testepisode om video</title>
+    <published>2026-08-10T05:00:00+00:00</published>
+    <updated>2026-08-10T05:00:00+00:00</updated>
+    <media:group>
+      <media:title>Episode 73: Automatiseret testepisode om video</media:title>
+      <media:thumbnail url="https://i.ytimg.com/vi/AbCdEfGhI_1/hqdefault.jpg" width="480" height="360"/>
+      <media:community><media:statistics views="73"/></media:community>
+    </media:group>
+  </entry>
+  <entry>
+    <id>yt:video:t0M0lAR4WcY</id>
+    <yt:videoId>t0M0lAR4WcY</yt:videoId>
+    <yt:channelId>UCEPkljgNMsbW3lNYZ-j6VHw</yt:channelId>
+    <title>Er du blevet træt af dit eget firma? Her er (den lovlige) løsning.</title>
+    <published>2026-08-03T05:00:00+00:00</published>
+    <updated>2026-08-03T05:00:00+00:00</updated>
+    <media:group>
+      <media:title>Er du blevet træt af dit eget firma? Her er (den lovlige) løsning.</media:title>
+      <media:thumbnail url="https://i.ytimg.com/vi/t0M0lAR4WcY/hqdefault.jpg" width="480" height="360"/>
+      <media:community><media:statistics views="7200"/></media:community>
+    </media:group>
+  </entry>
+</feed>
