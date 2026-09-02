@@ -1,23 +1,19 @@
 {
-  "name": "SaaS Købmænd",
-  "short_name": "SaaS Købmænd",
-  "description": "Dansk podcast om SaaS, iværksætteri og forretning.",
+  "name": "Bo Møller showet",
+  "short_name": "Bo Møller",
+  "description": "Tanker på farten om iværksætteri, business, software og livet.",
   "lang": "da-DK",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#fffaf4",
-  "theme_color": "#ff8b4d",
+  "background_color": "#e8eaeb",
+  "theme_color": "#101214",
   "icons": [
     {
-      "src": "/assets/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/assets/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "/assets/bo-avatar.jpg",
+      "sizes": "900x900",
+      "type": "image/jpeg",
+      "purpose": "any"
     }
   ]
 }

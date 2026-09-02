@@ -1,87 +1,17 @@
 <?php
-// Konfiguration
-$rss_url_default = 'https://anchor.fm/s/10eb99934/podcast/rss';
-$rss_url   = getenv('SAASKOBMAEND_RSS_URL') ?: $rss_url_default;
-$site_url  = 'https://xn--saaskbmnd-m3a9q.dk/'; // saaskøbmænd.dk – din kanoniske base-URL (punycode)
-$short_url = 'https://saaskoebmaend.dk';      // ASCII-domæne til korte del-links (uden æ/ø/å)
-$youtube_channel_id = 'UCEPkljgNMsbW3lNYZ-j6VHw';
-$youtube_feed_url_default = 'https://www.youtube.com/feeds/videos.xml?channel_id=' . $youtube_channel_id;
-$youtube_feed_url = getenv('SAASKOBMAEND_YOUTUBE_FEED_URL') ?: $youtube_feed_url_default;
-
-// Valgfri: manuelt cover art pr. episode (fx et Spotify-cover).
-// OBS: Spotifys eget custom episode-cover kommer IKKE med i RSS-feedet – feedet
-// indeholder kun ét billedfelt (itunes:image), som er det vi viser i forvejen.
-// Vil du alligevel vise et andet billede på en bestemt episode, så angiv det her
-// som  episodenummer => billed-URL  (afkommentér og udfyld efter behov):
-$episode_image_overrides = [
-    // 63 => 'https://eksempel.dk/mit-spotify-cover.jpg',
-];
-
-// Navn + beskrivelse på podcasten (bruges til SEO, schema.org og llms.txt)
-$site_name = 'SaaS Købmænd';
-$series_description = 'Hør SaaS Købmænd: ærlige samtaler med danske SaaS-iværksættere om forretning, vækst og livet som software-entreprenør.';
-
-// Værterne (bruges til schema.org Person + llms.txt)
-$hosts = [
-    [
-        'name'         => 'Anders Eiler',
-        'slug'         => 'anders-eiler',
-        'url'          => 'https://anderseiler.com',
-        'linkedin'     => 'https://www.linkedin.com/in/anderseiler/',
-        'image'        => '/assets/hosts/anders-eiler.jpg',
-        'image_width'  => 1024,
-        'image_height' => 1024,
-        'role'         => 'Medvært på SaaS Købmænd og founder af Herodesk',
-        'bio'          => 'SaaS-iværksætter og podcastvært. Står bag Herodesk.',
-        'long_bio'     => 'Anders Eiler er dansk SaaS-iværksætter, founder af kundeserviceplatformen Herodesk og medvært på SaaS Købmænd. I podcasten deler han erfaringer fra arbejdet med at bygge og skalere en international softwarevirksomhed — fra produkt og kunder til organisation og hverdagen som founder.',
-        'newsletter'   => 'https://anderseiler.com',
-        'knowsAbout'   => ['SaaS', 'kundeservice', 'produktudvikling', 'international vækst', 'iværksætteri'],
-        'companies'    => [
-            ['name' => 'Herodesk', 'url' => 'https://herodesk.io'],
-        ],
-        'sameAs'       => ['https://anderseiler.com', 'https://www.linkedin.com/in/anderseiler/'],
-    ],
-    [
-        'name'         => 'Bo Møller',
-        'slug'         => 'bo-moeller',
-        'url'          => 'https://bandeja.org',
-        'linkedin'     => 'https://www.linkedin.com/in/moelleren/',
-        'image'        => '/assets/hosts/bo-moeller.jpg',
-        'image_width'  => 225,
-        'image_height' => 225,
-        'role'         => 'Medvært på SaaS Købmænd og serieiværksætter',
-        'bio'          => 'Serieiværksætter med fokus på SaaS (Alunta, resOS, AnyHOA, PingPuffin m.fl.).',
-        'long_bio'     => 'Bo Møller er dansk serieiværksætter og medvært på SaaS Købmænd. Han bygger og driver softwarevirksomheder og deler konkrete erfaringer med produktudvikling, salg, automatisering, opkøb og drift af en portefølje af SaaS-forretninger.',
-        'newsletter'   => 'https://confirmsubscription.com/h/t/6839F4FAFC2AB8F0',
-        'knowsAbout'   => ['SaaS', 'serieiværksætteri', 'automatisering', 'opkøb', 'salg', 'produktudvikling'],
-        'companies'    => [
-            ['name' => 'Alunta', 'url' => 'https://alunta.com'],
-            ['name' => 'idguard.dk', 'url' => 'https://idguard.dk'],
-            ['name' => 'AnyHOA', 'url' => 'https://anyhoa.com'],
-            ['name' => 'resOS', 'url' => 'https://resos.com'],
-            ['name' => 'PingPuffin', 'url' => 'https://pingpuffin.com'],
-            ['name' => 'Octoreports', 'url' => 'https://octoreports.com'],
-            ['name' => 'Morningscore', 'url' => 'https://morningscore.io'],
-            ['name' => 'Boligforeningsweb', 'url' => 'https://boligforeningsweb.dk'],
-        ],
-        'sameAs'       => ['https://bandeja.org', 'https://www.linkedin.com/in/moelleren/'],
-    ],
-];
-
-// Lyt-platforme (bruges til del-links + llms.txt)
-$platforms = [
-    'Apple Podcasts' => $short_url . '/apple',
-    'Spotify'        => $short_url . '/spotify',
-    'YouTube'        => $short_url . '/youtube',
-];
-
-// Kanoniske platform-profiler (til schema.org sameAs – binder podcastens identitet
-// sammen på tværs af platforme, vigtigt for GEO/entity-genkendelse)
-$platform_profiles = [
-    'https://open.spotify.com/show/3PwjiFpVxnHuY3E6ARS8YN',
-    'https://podcasts.apple.com/us/podcast/saas-k%C3%B8bm%C3%A6nd/id1810152143',
-    'https://www.youtube.com/@saask%C3%B8bm%C3%A6nd',
-];
+$config = require dirname(__DIR__) . '/config/podcast.php';
+$rss_url = $config['rss_url'];
+$public_rss_url = $config['public_rss_url'];
+$site_url = $config['site_url'];
+$short_url = $config['short_url'];
+$youtube_channel_id = $config['youtube_channel_id'];
+$youtube_feed_url = $config['youtube_feed_url'];
+$episode_image_overrides = $config['episode_image_overrides'];
+$site_name = $config['site_name'];
+$series_description = $config['series_description'];
+$hosts = $config['hosts'];
+$platforms = $config['platforms'];
+$platform_profiles = array_values($platforms);
 
 // ===== Hjælpefunktioner =====
 function dk_slugify($str) {
@@ -112,6 +42,12 @@ function get_audio_url_from_item($item) {
 function extract_episode_number_from_title($title) {
     if (preg_match('/(?:^|\s)(?:episode|ep|#)\s*(\d+)\b/i', $title, $m)) return (int)$m[1];
     return null;
+}
+function get_episode_number($item, $fallback) {
+    $itunes = $item->children('itunes', true);
+    if (isset($itunes->episode) && (int)$itunes->episode > 0) return (int)$itunes->episode;
+    $from_title = extract_episode_number_from_title((string)$item->title);
+    return $from_title ?: $fallback;
 }
 function parse_duration_seconds($item) {
     $itunes = $item->children('itunes', true);
@@ -181,7 +117,7 @@ function normalize_match_title($title) {
     $title = html_entity_decode((string)$title, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $title = mb_strtolower($title, 'UTF-8');
     $title = strtr($title, ['æ'=>'ae','ø'=>'oe','å'=>'aa','é'=>'e','á'=>'a','ö'=>'o','ü'=>'u','ä'=>'a']);
-    $title = preg_replace('/\bsaas\s+koebmaend\s*(?:(?:episode|ep)\s*)?#?\s*\d+\b/', ' ', $title);
+    $title = preg_replace('/\bbo\s+moeller\s+showet\s*(?:(?:episode|ep)\s*)?#?\s*\d+\b/', ' ', $title);
     return trim(preg_replace('/[^a-z0-9]+/', ' ', $title));
 }
 function extract_youtube_episode_number($title) {
@@ -194,7 +130,7 @@ function youtube_title_similarity($episode_title, $video_title) {
     if ($a === '' || $b === '') return 0.0;
     if ($a === $b) return 1.0;
 
-    $stop = ['saas', 'koebmaend', 'episode', 'ep', 'og', 'i', 'af', 'at', 'en', 'et', 'til', 'fra', 'med', 'vi', 'det', 'de', 'den', 'der', 'som', 'man', 'for', 'paa', 'er', 'har', 'om'];
+    $stop = ['bo', 'moeller', 'showet', 'episode', 'ep', 'og', 'i', 'af', 'at', 'en', 'et', 'til', 'fra', 'med', 'vi', 'det', 'de', 'den', 'der', 'som', 'man', 'for', 'paa', 'er', 'har', 'om'];
     $tokens_a = array_values(array_diff(array_unique(explode(' ', $a)), $stop));
     $tokens_b = array_values(array_diff(array_unique(explode(' ', $b)), $stop));
     $intersection = count(array_intersect($tokens_a, $tokens_b));
@@ -209,28 +145,35 @@ function youtube_title_similarity($episode_title, $video_title) {
 function episode_topics($title, $content) {
     $haystack = mb_strtolower(html_entity_decode(strip_tags($title . ' ' . $content), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'UTF-8');
     $rules = [
-        'AI' => '/\b(ai|llm|chatgpt|kunstig intelligens|open source|machine learning)\b/u',
-        'Salg' => '/\b(salg|saelg|sælg|kunde|kunder|marketing|markedsføring|pipeline)\b/u',
-        'Vækst' => '/\b(vækst|vaekst|skalering|skalere|scale|milliard|international)\b/u',
-        'Exit' => '/\b(exit|opkøb|opkoeb|solgt|sælge firma|saelge firma)\b/u',
-        'Produkt' => '/\b(produkt|software|valider|idé|ide|saas)\b/u',
-        'Iværksætteri' => '/\b(iværksætter|ivaerksaetter|firma|forretning|founder|arbejdsdag|job)\b/u',
+        'Teknologi' => '/\b(ai|llm|chatgpt|mcp|software|teknologi|automatisering)\b/u',
+        'Business' => '/\b(business|salg|saelg|sælg|kunde|kunder|marketing|firma|forretning)\b/u',
+        'Iværksætteri' => '/\b(iværksætter|ivaerksaetter|founder|co-founder|virksomhed|virksomheder)\b/u',
+        'Produkt' => '/\b(produkt|bygge|valider|idé|ide|hundemad)\b/u',
+        'Livet' => '/\b(livet|mening|filosofi|tanker|langsom|hurtig|alene|andre)\b/u',
     ];
     $topics = [];
     foreach ($rules as $label => $pattern) {
         if (preg_match($pattern, $haystack)) $topics[] = $label;
     }
-    return $topics ?: ['SaaS'];
+    return $topics ?: ['Tanker'];
 }
 // Ren tekst-teaser fra (evt. HTML-)indhold: fjern tags, fold whitespace, klip til længde
 function teaser($html, $limit, $ellipsis = true) {
-    $text = strip_tags((string)$html);
+    // Bevar ordgrænser mellem blokke. strip_tags alene ville fx samle
+    // "andre.</p><p>Der" til "andre.Der" i kortenes uddrag.
+    $html = preg_replace('/<\/?(?:p|div|h[1-6]|li|blockquote|pre|br)\b[^>]*>/iu', ' ', (string)$html);
+    $text = strip_tags($html);
     // Afkod entiteter (&quot; &amp; …) til ren tekst – ellers lækker de i llms.txt
     // og dobbelt-encodes (&amp;quot;) når output senere køres gennem htmlspecialchars.
     $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $text = trim(preg_replace('/\s+/', ' ', $text));
     if (mb_strlen($text, 'UTF-8') <= $limit) return $text;
     return mb_substr($text, 0, $limit, 'UTF-8') . ($ellipsis ? '…' : '');
+}
+// Podcast-feedet kan indeholde typografiske em-dashes som tegn eller entitet.
+// Sitet bruger konsekvent den almindelige bindestreg i al synlig tekst.
+function replace_em_dashes($text) {
+    return str_ireplace(["\u{2014}", '&' . 'mdash;', '&#' . '8212;', '&#x' . '2014;'], '-', (string)$text);
 }
 // ISO 8601-varighed (fx "PT1H2M3S") til schema.org timeRequired
 function iso8601_duration($seconds) {
@@ -334,8 +277,8 @@ function save_atomic_file($path, $contents) {
 // Hent RSS med to lag cache: hurtig system-cache og en permanent, deployet
 // snapshot-fil. Sitet virker derfor også efter genstart, hvis Anchor er nede.
 function fetch_rss_cached($rss_url, $ttl = 900, $fallback_file = null) {
-    $cache_namespace = (string)getenv('SAASKOBMAEND_CACHE_NAMESPACE');
-    $cache_file = sys_get_temp_dir() . '/saaskobmaend_rss_' . md5($rss_url . '|' . $cache_namespace) . '.xml';
+    $cache_namespace = (string)getenv('BOMOELLERSHOW_CACHE_NAMESPACE');
+    $cache_file = sys_get_temp_dir() . '/bomoellershow_rss_' . md5($rss_url . '|' . $cache_namespace) . '.xml';
 
     // 1) Frisk cache? Brug den.
     if (is_file($cache_file) && (time() - (int)@filemtime($cache_file) < $ttl)) {
@@ -348,7 +291,7 @@ function fetch_rss_cached($rss_url, $ttl = 900, $fallback_file = null) {
 
     // 2) Hent friskt feed (med timeout, så en langsom server ikke hænger sitet).
     $ctx = stream_context_create([
-        'http' => ['timeout' => 8, 'user_agent' => 'saaskobmaend-web/1.0'],
+        'http' => ['timeout' => 8, 'user_agent' => 'bomoellershow-web/1.0'],
         'https'=> ['timeout' => 8],
     ]);
     $xml = @file_get_contents($rss_url, false, $ctx);
@@ -434,10 +377,10 @@ function save_youtube_episode_catalog($catalog_file, $channel_id, $episodes) {
 // YouTubes offentlige Atom-feed kræver ingen API-nøgle. Det indeholder de
 // seneste uploads; det permanente katalog gør, at en video aldrig glemmes igen.
 function fetch_youtube_cached($feed_url, $ttl = 900, $catalog_files = []) {
-    $cache_namespace = (string)getenv('SAASKOBMAEND_CACHE_NAMESPACE');
+    $cache_namespace = (string)getenv('BOMOELLERSHOW_CACHE_NAMESPACE');
     $cache_key = md5($feed_url . '|' . $cache_namespace);
-    $cache_file = sys_get_temp_dir() . '/saaskobmaend_youtube_' . $cache_key . '.xml';
-    $history_file = sys_get_temp_dir() . '/saaskobmaend_youtube_history_' . $cache_key . '.json';
+    $cache_file = sys_get_temp_dir() . '/bomoellershow_youtube_' . $cache_key . '.xml';
+    $history_file = sys_get_temp_dir() . '/bomoellershow_youtube_history_' . $cache_key . '.json';
     $xml = false;
     $videos_by_id = [];
 
@@ -463,7 +406,7 @@ function fetch_youtube_cached($feed_url, $ttl = 900, $catalog_files = []) {
     }
     if ($xml === false) {
         $ctx = stream_context_create([
-            'http' => ['timeout' => 8, 'user_agent' => 'saaskobmaend-web/1.0'],
+            'http' => ['timeout' => 8, 'user_agent' => 'bomoellershow-web/1.0'],
             'https'=> ['timeout' => 8],
         ]);
         $fresh = @file_get_contents($feed_url, false, $ctx);
@@ -544,11 +487,11 @@ function get_episode_image_from_item($item, $fallback = '') {
 }
 
 // ===== Hent RSS (med cache) =====
-$rss_snapshot_file = getenv('SAASKOBMAEND_RSS_SNAPSHOT_FILE') ?: (dirname(__DIR__) . '/data/podcast-rss-fallback.xml');
+$rss_snapshot_file = getenv('BOMOELLERSHOW_RSS_SNAPSHOT_FILE') ?: (dirname(__DIR__) . '/data/podcast-rss-fallback.xml');
 $rss = fetch_rss_cached($rss_url, 900, $rss_snapshot_file); // cache i 15 min
 if (!$rss) { http_response_code(500); die('<h2>Kunne ikke hente podcast-feedet.</h2>'); }
 
-// Podcast cover — preferér itunes:image (typisk stor) først
+// Podcast cover - preferér itunes:image (typisk stor) først
 $cover_image = '';
 $itunes_ch = $rss->channel->children('itunes', true);
 if ($itunes_ch && isset($itunes_ch->image)) {
@@ -561,9 +504,9 @@ if ($cover_image === '' && isset($rss->channel->image->url)) {
 
 // Det verificerede seed-katalog indeholder alle historiske episoder. Runtime-
 // kataloget husker nye matches; Atom-feedet beriger de seneste med dato/views.
-$youtube_disabled = getenv('SAASKOBMAEND_DISABLE_YOUTUBE') === '1';
+$youtube_disabled = getenv('BOMOELLERSHOW_DISABLE_YOUTUBE') === '1';
 $youtube_catalog_seed = dirname(__DIR__) . '/data/youtube-catalog-seed.json';
-$youtube_catalog_runtime = getenv('SAASKOBMAEND_YOUTUBE_RUNTIME_FILE') ?: (dirname(__DIR__) . '/data/youtube-catalog-runtime.json');
+$youtube_catalog_runtime = getenv('BOMOELLERSHOW_YOUTUBE_RUNTIME_FILE') ?: (dirname(__DIR__) . '/data/youtube-catalog-runtime.json');
 $youtube_seed_catalog = $youtube_disabled ? [] : load_youtube_episode_catalog([$youtube_catalog_seed]);
 $youtube_data = $youtube_disabled
     ? ['videos' => [], 'episodes' => []]
@@ -593,19 +536,18 @@ $idx = 0;
 $rss_item_count = count($rss->channel->item);
 
 foreach ($rss->channel->item as $item) {
-    $title = (string)$item->title;
+    $title = replace_em_dashes((string)$item->title);
     $pub_ts = strtotime((string)$item->pubDate);
     $date_iso = $pub_ts ? date('Y-m-d', $pub_ts) : '';
     $date_iso_full = $pub_ts ? date('c', $pub_ts) : ''; // fuld ISO8601 til OG/schema
     $date_human = $pub_ts ? date('d.m.Y', $pub_ts) : '';
-    $desc_raw = (string)$item->description;
+    $desc_raw = replace_em_dashes((string)$item->description);
 
     $content_ns = $item->children('http://purl.org/rss/1.0/modules/content/');
-    $content_encoded = isset($content_ns->encoded) ? (string)$content_ns->encoded : '';
+    $content_encoded = isset($content_ns->encoded) ? replace_em_dashes((string)$content_ns->encoded) : '';
 
     $audio_url = get_audio_url_from_item($item);
-    $ep_no = extract_episode_number_from_title($title);
-    $ep_no = $ep_no ?: ($rss_item_count - $idx);
+    $ep_no = get_episode_number($item, $rss_item_count - $idx);
 
     $duration_seconds = parse_duration_seconds($item);
     $duration_label = format_duration($duration_seconds);
@@ -737,7 +679,7 @@ usort($popular_episodes, function ($a, $b) {
 });
 $popular_episodes = array_slice($popular_episodes, 0, 4);
 
-$topic_order = ['AI', 'Salg', 'Vækst', 'Exit', 'Produkt', 'Iværksætteri', 'SaaS'];
+$topic_order = ['Iværksætteri', 'Business', 'Teknologi', 'Produkt', 'Livet', 'Tanker'];
 $topic_counts = [];
 foreach ($episodes as $ep) {
     foreach ($ep['topics'] as $topic) {
@@ -824,13 +766,13 @@ if (preg_match('#^/llms\.txt$#', $request_uri)) {
     $L[] = '';
     $L[] = '> ' . $series_description;
     $L[] = '';
-    $L[] = 'SaaS Købmænd er en dansk podcast om SaaS, iværksætteri og forretning. '
-         . 'Nye episoder udkommer (næsten) hver mandag. Sproget er dansk.';
+    $L[] = 'I Bo Møller showet deler jeg personlige refleksioner optaget på farten. '
+         . 'Jeg taler om alt fra iværksætteri, business og software til livet. Sproget er dansk.';
     $L[] = '';
-    $L[] = '## Værter';
+    $L[] = '## Vært';
     foreach ($hosts as $h) {
         $profile_url = $base . '/vaert/' . rawurlencode($h['slug']);
-        $L[] = '- [' . $h['name'] . '](' . $profile_url . ') — ' . $h['long_bio'];
+        $L[] = '- [' . $h['name'] . '](' . $profile_url . ') - ' . $h['long_bio'];
     }
     $L[] = '';
     $L[] = '## Episoder';
@@ -910,7 +852,7 @@ if ($path === '' || $path === '/') {
 }
 
 // ===== SEO / OG =====
-$page_title = "SaaS Købmænd Podcast – Alle episoder";
+$page_title = $site_name . ' – tanker på farten';
 $page_description = $series_description;
 $page_url = rtrim($site_url, '/') . '/';
 $og_image = $cover_image;
@@ -924,8 +866,8 @@ if ($is_single) {
     $i = $slug_to_index[$requested_slug];
     $single = $episodes[$i];
 
-    $page_title = teaser($single['title'], 52) . " – SaaS Købmænd";
-    $social_title = $single['title'] . " – SaaS Købmænd";
+    $page_title = teaser($single['title'], 52) . ' – ' . $site_name;
+    $social_title = $single['title'] . ' – ' . $site_name;
     $page_description = teaser($single['content'], 160);
     $page_url = rtrim($site_url, '/') . '/episode/' . rawurlencode($single['slug']);
 
@@ -948,15 +890,15 @@ if ($is_single) {
     if ($lower) { $prev_link  = '/episode/' . htmlspecialchars($lower['slug']);  $prev_label = '← Episode ' . (int)$lower['ep_no']; }
     if ($higher){ $next_link  = '/episode/' . htmlspecialchars($higher['slug']); $next_label = 'Episode ' . (int)$higher['ep_no'] . ' →'; }
 } elseif ($is_host && $host_profile) {
-    $page_title = $host_profile['name'] . ' – Podcastvært på SaaS Købmænd';
+    $page_title = 'Om mig – ' . $site_name;
     $page_description = teaser($host_profile['long_bio'], 160);
     $page_url = rtrim($site_url, '/') . '/vaert/' . rawurlencode($host_profile['slug']);
     $og_image = rtrim($site_url, '/') . $host_profile['image'];
     $og_image_width = (int)$host_profile['image_width'];
     $og_image_height = (int)$host_profile['image_height'];
 } elseif ($is_404) {
-    $page_title = "404 – Siden findes ikke · SaaS Købmænd";
-    $page_description = "Ups! Den side findes ikke. Måske leder du efter en af vores podcast-episoder?";
+    $page_title = '404 – Siden findes ikke · ' . $site_name;
+    $page_description = "Jeg kan ikke finde den side. Måske leder du efter en af mine podcast-episoder?";
     // $page_url bevares som forsiden (default) – en 404 skal ikke kanonisere til sig selv.
 }
 $social_title = $social_title ?: $page_title;
@@ -974,7 +916,7 @@ foreach ($hosts as $h) {
         'name'        => $h['name'],
         'url'         => $profile_url,
         'description' => $h['long_bio'],
-        'jobTitle'    => $h['role'],
+        'jobTitle'    => $h['job_title'],
         'image'       => [
             '@type'  => 'ImageObject',
             'url'    => $ld_base . $h['image'],
@@ -1091,7 +1033,7 @@ if ($is_single && $single) {
         '@type'           => 'BreadcrumbList',
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => 'Forside', 'item' => $ld_base . '/'],
-            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Værter', 'item' => $ld_base . '/#vaerterne'],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Om mig', 'item' => $ld_base . '/#om-bo'],
             ['@type' => 'ListItem', 'position' => 3, 'name' => $host_profile['name'], 'item' => $page_url],
         ],
     ];
@@ -1113,7 +1055,7 @@ if ($is_single && $single) {
         'description' => $series_description,
         'inLanguage'  => 'da-DK',
         'image'       => $cover_image ?: null,
-        'webFeed'     => $rss_url,
+        'webFeed'     => $public_rss_url,
         'sameAs'      => $platform_profiles,
         'author'      => $ld_author_refs,
     ];
@@ -1150,17 +1092,14 @@ if ($ld_graph) {
     <?php if ($is_single && $prev_link): ?><link rel="prev" href="<?= $prev_link ?>"><?php endif; ?>
     <?php if ($is_single && $next_link): ?><link rel="next" href="<?= $next_link ?>"><?php endif; ?>
 
-    <link rel="icon" href="/favicon.ico" sizes="32x32">
-    <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
-    <link rel="alternate icon" href="/assets/icons/favicon-32.png" type="image/png" sizes="32x32">
-    <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="/assets/bo-avatar.jpg?v=1" type="image/jpeg">
     <link rel="manifest" href="/site.webmanifest">
     <?php if ($youtube_videos): ?><link rel="preconnect" href="https://i.ytimg.com" crossorigin><?php endif; ?>
     <?php if ($cover_image): ?><link rel="preconnect" href="https://d3t3ozftmdmh3i.cloudfront.net" crossorigin><?php endif; ?>
-    <meta name="theme-color" content="#ff8b4d">
+    <meta name="theme-color" content="#101214">
 
     <!-- Podcast-feed (gør RSS-feedet synligt for feed-læsere og podcast-crawlere) -->
-    <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($site_name) ?>" href="<?= htmlspecialchars($rss_url) ?>">
+    <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($site_name) ?>" href="<?= htmlspecialchars($public_rss_url) ?>">
 
     <!-- Open Graph -->
     <meta property="og:type" content="<?= $is_single ? 'article' : ($is_host ? 'profile' : 'website') ?>">
@@ -1362,25 +1301,20 @@ if ($ld_graph) {
         }
     </style>
     <?php endif; ?>
-    <link rel="stylesheet" href="/assets/site-v2.css?v=3">
-
-<!-- OctoReports Tracking -->
-<script>!function(k,u){function E(s){return encodeURIComponent(s||"")}var q=new URLSearchParams(location.search),G=n=>q.get(n)||"",D=/iPad|Tablet|Android(?!.*Mobile)/i.test(navigator.userAgent)?2:/Mobi|Android.+Mobile|iPhone/i.test(navigator.userAgent)?1:3,N=(performance.getEntriesByType&&performance.getEntriesByType("navigation")[0])||{},P=location.pathname+location.search;P.length>1800&&(P=P.slice(0,1790)+"…");var Q="?k="+E(k)+"&h="+E(location.hostname)+"&p="+E(P)+"&r="+E(document.referrer||"")+"&pt="+E((document.title||"").slice(0,300))+"&us="+E(G("utm_source"))+"&um="+E(G("utm_medium"))+"&uc="+E(G("utm_campaign"))+"&ut="+E(G("utm_term"))+"&uu="+E(G("utm_content"))+"&dv="+D+"&tf="+(N.responseStart&&N.requestStart?Math.round(N.responseStart-N.requestStart):"")+"&dc="+(N.domContentLoadedEventEnd?Math.round(N.domContentLoadedEventEnd-(N.startTime||0)):"")+"&ld="+(N.loadEventEnd?Math.round(N.loadEventEnd-(N.startTime||0)):"")+"&t="+Date.now();(new Image).src=u+Q}("26f4922196b86eddde8fc78b553fd927457448a8","https://track.octoreports.com/track.php");</script>
+    <link rel="stylesheet" href="/assets/site-v2.css?v=12">
 
 </head>
 <body>
 <div class="site-shell">
   <header class="site-header">
-    <a class="brand" href="/" aria-label="SaaS Købmænd – forside">
-      <img class="brand-mark" src="/assets/logo-mark.svg" width="42" height="42" alt="">
-      <span>SaaS Købmænd</span>
+    <a class="brand" href="/" aria-label="<?= htmlspecialchars($site_name) ?> – forside">
+      <img class="brand-mark" src="/assets/bo-avatar.jpg" width="42" height="42" alt="">
+      <span>BO MØLLER <em>/ SHOWET</em></span>
     </a>
     <nav class="site-nav" aria-label="Hovednavigation">
       <a href="/#episoder">Episoder</a>
-      <a href="/#vaerterne">Værterne</a>
-      <?php foreach ($platforms as $name => $url): ?>
-        <a href="<?= htmlspecialchars($url) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($name) ?></a>
-      <?php endforeach; ?>
+      <a href="/#om-bo">Om mig</a>
+      <a class="listen-nav" href="<?= htmlspecialchars($platforms['Spotify']) ?>" target="_blank" rel="noopener" aria-label="Lyt til Bo Møller showet på Spotify">Lyt <span aria-hidden="true">↗</span></a>
     </nav>
   </header>
 
@@ -1389,83 +1323,17 @@ if ($ld_graph) {
     <?php $latest = $episodes[0] ?? null; ?>
     <section class="home-hero" aria-labelledby="show-title">
       <div class="hero-copy">
-        <span class="hero-kicker">Nye episoder næsten hver mandag</span>
-        <h1 id="show-title">SaaS <span>Købmænd</span></h1>
-        <p class="hero-intro">Ærlige samtaler om at bygge, drive og sælge softwarevirksomheder — med danske founders, der har prøvet det selv.</p>
+        <span class="hero-kicker"><span aria-hidden="true">bo@showet:~$</span> ./start</span>
+        <h1 id="show-title">Bo Møller <span>showet</span></h1>
+        <p class="hero-intro">Her deler jeg ufiltrerede tanker om at bygge virksomheder, bruge teknologi og finde mening i det hele - optaget fra bilen, gåturen og hverdagen.</p>
         <div class="hero-actions">
-          <?php if ($latest): ?><a class="button button-primary" href="<?= '/episode/' . htmlspecialchars($latest['slug']) ?>">Se seneste episode <span aria-hidden="true">→</span></a><?php endif; ?>
-          <a class="button button-secondary" href="#episoder">Find en episode</a>
+          <?php if ($latest): ?><a class="button button-primary" href="<?= '/episode/' . htmlspecialchars($latest['slug']) ?>">Seneste episode <span aria-hidden="true">→</span></a><?php endif; ?>
         </div>
-      </div>
-
-      <?php if ($latest): ?>
-      <article class="latest-panel">
-        <?php if (!empty($latest['youtube_id'])): ?>
-          <button class="video-facade" type="button" data-video-id="<?= htmlspecialchars($latest['youtube_id']) ?>" data-video-title="<?= htmlspecialchars($latest['title']) ?>" aria-label="Afspil <?= htmlspecialchars($latest['title']) ?>">
-            <img src="<?= htmlspecialchars($latest['youtube_thumbnail']) ?>" srcset="<?= htmlspecialchars(youtube_thumbnail_srcset($latest['youtube_id'], $latest['youtube_thumbnail'])) ?>" sizes="(max-width: 650px) 320px, 520px" width="1280" height="720" fetchpriority="high" alt="">
-            <span class="play-button" aria-hidden="true">▶</span>
-          </button>
-        <?php else: ?>
-          <div class="audio-visual">
-            <img src="<?= htmlspecialchars($latest['image'] ?: $cover_image) ?>" width="600" height="600" fetchpriority="high" alt="Cover for <?= htmlspecialchars($latest['title']) ?>">
-            <span class="audio-only-badge">♪ Lyt til episoden</span>
-          </div>
-        <?php endif; ?>
-        <div class="latest-panel-copy">
-          <div class="latest-label">Seneste episode</div>
-          <h2><?= htmlspecialchars($latest['title']) ?></h2>
-          <div class="latest-meta">Episode <?= (int)$latest['ep_no'] ?> · <?= htmlspecialchars($latest['date_human']) ?><?php if ($latest['duration']): ?> · <?= htmlspecialchars($latest['duration']) ?><?php endif; ?></div>
-          <a class="latest-link" href="<?= '/episode/' . htmlspecialchars($latest['slug']) ?>">Åbn episoden →</a>
-        </div>
-      </article>
-      <?php endif; ?>
-    </section>
-
-    <?php if ($popular_episodes): ?>
-    <section class="section section-dark" aria-labelledby="popular-title">
-      <div class="section-header">
-        <div>
-          <div class="eyebrow">Seernes favoritter</div>
-          <h2 id="popular-title">Populært lige nu</h2>
-          <p>Baseret på offentlige visninger på YouTube.</p>
-        </div>
-      </div>
-      <div class="popular-grid">
-        <?php foreach ($popular_episodes as $rank => $ep): ?>
-        <a class="popular-card" href="<?= '/episode/' . htmlspecialchars($ep['slug']) ?>">
-          <img src="<?= htmlspecialchars($ep['youtube_thumbnail']) ?>" srcset="<?= htmlspecialchars(youtube_thumbnail_srcset($ep['youtube_id'], $ep['youtube_thumbnail'])) ?>" sizes="(max-width: 650px) calc(50vw - 24px), (max-width: 900px) calc(50vw - 32px), 275px" loading="lazy" decoding="async" width="1280" height="720" alt="">
-          <div class="popular-rank">#<?= $rank + 1 ?> populær</div>
-          <h3><?= htmlspecialchars($ep['title']) ?></h3>
-          <div class="popular-views"><?= htmlspecialchars(format_views($ep['youtube_views'])) ?> visninger</div>
-        </a>
-        <?php endforeach; ?>
       </div>
     </section>
-    <?php endif; ?>
 
     <section class="section" id="episoder" aria-labelledby="episodes-title">
-      <div class="section-header">
-        <div>
-          <div class="eyebrow"><?= count($episodes) ?> samtaler om SaaS</div>
-          <h2 id="episodes-title">Find din næste episode</h2>
-          <p>Søg på gæst, virksomhed eller det problem, du står med.</p>
-        </div>
-      </div>
-      <div class="episode-tools">
-        <label class="search-wrap">
-          <span aria-hidden="true">⌕</span>
-          <span class="sr-only">Søg i episoder</span>
-          <input class="episode-search" id="episode-search" type="search" placeholder="Søg i alle episoder…" autocomplete="off">
-        </label>
-        <div class="result-count" id="result-count" aria-live="polite"><?= count($episodes) ?> episoder</div>
-      </div>
-      <div class="filters" role="group" aria-label="Filtrér efter emne">
-        <button class="filter-btn" type="button" data-topic="all" aria-pressed="true">Alle</button>
-        <?php foreach ($all_topics as $topic): ?>
-          <button class="filter-btn" type="button" data-topic="<?= htmlspecialchars(mb_strtolower($topic, 'UTF-8')) ?>" aria-pressed="false"><?= htmlspecialchars($topic) ?></button>
-        <?php endforeach; ?>
-      </div>
-
+      <h2 class="sr-only" id="episodes-title">Episoder</h2>
       <div class="episode-grid" id="episode-grid">
         <?php foreach ($episodes as $ep): ?>
         <?php $thumb = $ep['youtube_thumbnail'] ?: ($ep['image'] ?: $cover_image); ?>
@@ -1485,7 +1353,6 @@ if ($ld_graph) {
         </a>
         <?php endforeach; ?>
       </div>
-      <div class="empty-state" id="empty-state">Ingen episoder matcher din søgning endnu.</div>
     </section>
 
   <?php elseif ($is_single && $single): ?>
@@ -1537,8 +1404,8 @@ if ($ld_graph) {
         <aside class="episode-aside">
           <strong>Fortsæt samtalen</strong>
           <?php if (!empty($single['youtube_id'])): ?><a href="<?= htmlspecialchars('https://www.youtube.com/watch?v=' . $single['youtube_id']) ?>" target="_blank" rel="noopener">Kommentér på YouTube ↗</a><?php endif; ?>
-          <a href="<?= htmlspecialchars($short_url . '/spotify') ?>" target="_blank" rel="noopener">Følg på Spotify ↗</a>
-          <a href="<?= htmlspecialchars($short_url . '/apple') ?>" target="_blank" rel="noopener">Følg på Apple ↗</a>
+          <a href="<?= htmlspecialchars($platforms['Spotify']) ?>" target="_blank" rel="noopener">Følg på Spotify ↗</a>
+          <a href="<?= htmlspecialchars($platforms['Apple Podcasts']) ?>" target="_blank" rel="noopener">Følg på Apple ↗</a>
         </aside>
       </div>
 
@@ -1579,33 +1446,33 @@ if ($ld_graph) {
 
   <?php elseif ($is_host && $host_profile): ?>
     <article class="host-profile">
-      <nav class="crumbs" aria-label="Brødkrummesti"><a href="/">Forside</a><span aria-hidden="true">›</span><a href="/#vaerterne">Værter</a><span aria-hidden="true">›</span><span><?= htmlspecialchars($host_profile['name']) ?></span></nav>
+      <nav class="crumbs" aria-label="Brødkrummesti"><a href="/">Forside</a><span aria-hidden="true">›</span><a href="/#om-bo">Om mig</a><span aria-hidden="true">›</span><span><?= htmlspecialchars($host_profile['name']) ?></span></nav>
       <header class="host-hero">
-        <div class="host-portrait-frame"><img class="host-portrait" src="<?= htmlspecialchars($host_profile['image']) ?>" width="<?= (int)$host_profile['image_width'] ?>" height="<?= (int)$host_profile['image_height'] ?>" alt="<?= htmlspecialchars($host_profile['name']) ?>, podcastvært på SaaS Købmænd" fetchpriority="high"></div>
+        <div class="host-portrait-frame"><img class="host-portrait" src="<?= htmlspecialchars($host_profile['image']) ?>" width="<?= (int)$host_profile['image_width'] ?>" height="<?= (int)$host_profile['image_height'] ?>" alt="<?= htmlspecialchars($host_profile['name']) ?>, vært på <?= htmlspecialchars($site_name) ?>" fetchpriority="high"></div>
         <div>
-          <div class="eyebrow">Podcastvært på SaaS Købmænd</div>
+          <div class="eyebrow">Jeg står bag <?= htmlspecialchars($site_name) ?></div>
           <h1><?= htmlspecialchars($host_profile['name']) ?></h1>
           <p class="host-role"><?= htmlspecialchars($host_profile['role']) ?></p>
           <p class="host-long-bio"><?= htmlspecialchars($host_profile['long_bio']) ?></p>
           <div class="hero-actions">
-            <a class="button button-primary" href="<?= htmlspecialchars($host_profile['url']) ?>" target="_blank" rel="me noopener">Besøg website ↗</a>
-            <a class="button button-secondary" href="<?= htmlspecialchars($host_profile['linkedin']) ?>" target="_blank" rel="me noopener">LinkedIn ↗</a>
-            <a class="button button-secondary" href="<?= htmlspecialchars($host_profile['newsletter']) ?>" target="_blank" rel="noopener">Tilmeld nyhedsbrev</a>
+            <a class="button button-primary" href="<?= htmlspecialchars($host_profile['url']) ?>" target="_blank" rel="me noopener">Besøg mit website ↗</a>
+            <a class="button button-secondary" href="<?= htmlspecialchars($host_profile['linkedin']) ?>" target="_blank" rel="me noopener">Min LinkedIn ↗</a>
+            <a class="button button-secondary" href="<?= htmlspecialchars($host_profile['newsletter']) ?>" target="_blank" rel="noopener">Få mit nyhedsbrev</a>
           </div>
         </div>
       </header>
 
       <div class="host-facts">
         <section aria-labelledby="expertise-title">
-          <div class="eyebrow">Arbejder med</div>
-          <h2 id="expertise-title">Erfaringsområder</h2>
+          <div class="eyebrow">Det arbejder jeg med</div>
+          <h2 id="expertise-title">Mine fokusområder</h2>
           <ul class="expertise-list">
             <?php foreach ($host_profile['knowsAbout'] as $topic): ?><li><?= htmlspecialchars($topic) ?></li><?php endforeach; ?>
           </ul>
         </section>
         <section aria-labelledby="companies-title">
-          <div class="eyebrow">Virksomheder og projekter</div>
-          <h2 id="companies-title">Tilknytninger</h2>
+          <div class="eyebrow">Mine virksomheder og projekter</div>
+          <h2 id="companies-title">Det er jeg involveret i</h2>
           <ul class="company-list">
             <?php foreach ($host_profile['companies'] as $company): ?><li><a href="<?= htmlspecialchars($company['url']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($company['name']) ?> <span aria-hidden="true">↗</span></a></li><?php endforeach; ?>
           </ul>
@@ -1613,7 +1480,7 @@ if ($ld_graph) {
       </div>
 
       <section class="section host-episodes" aria-labelledby="host-episodes-title">
-        <div class="section-header"><div><div class="eyebrow">Fra podcasten</div><h2 id="host-episodes-title">Seneste episoder med <?= htmlspecialchars($host_profile['name']) ?></h2><p>Begge værter medvirker i og er redaktionelt ansvarlige for podcastens episoder.</p></div></div>
+        <div class="section-header"><div><div class="eyebrow">Fra min podcast</div><h2 id="host-episodes-title">Mine seneste tanker</h2><p>Jeg fortæller og redigerer selv alle episoder.</p></div></div>
         <div class="episode-grid">
           <?php foreach (array_slice($episodes, 0, 6) as $ep): $thumb = $ep['youtube_thumbnail'] ?: ($ep['image'] ?: $cover_image); ?>
           <a class="episode-card-v2" href="<?= '/episode/' . htmlspecialchars($ep['slug']) ?>">
@@ -1628,8 +1495,8 @@ if ($ld_graph) {
 
   <?php else: ?>
     <div class="http404">
-      <div class="oops">404</div><h1>Siden findes ikke</h1>
-      <p class="joke">Det ligner en klassisk SaaS-fejl: <em>Feature not found</em>.</p>
+      <div class="oops">404</div><h1>Jeg kan ikke finde siden</h1>
+      <p class="joke">Jeg er vist kørt ned ad den forkerte afkørsel.</p>
       <a class="home-btn" href="/">Tilbage til forsiden</a>
       <div class="suggest">Eller prøv en af de nyeste episoder:</div>
       <div class="suggest-list"><?php foreach (array_slice($episodes, 0, 5) as $ep): ?><a href="<?= '/episode/' . htmlspecialchars($ep['slug']) ?>">Ep. <?= (int)$ep['ep_no'] ?>: <?= htmlspecialchars(teaser($ep['title'], 42)) ?></a><?php endforeach; ?></div>
@@ -1637,226 +1504,44 @@ if ($ld_graph) {
   <?php endif; ?>
 
   <?php if (!$is_404): ?>
-    <section class="newsletter-cta" aria-label="Nyhedsbreve">
-      <div><div class="cta-title">Mere SaaS. Mindre varm luft.</div><p class="cta-desc">Få erfaringer om SaaS, iværksætteri og forretning direkte fra værterne.</p></div>
-      <div class="cta-buttons"><a class="cta-btn" href="https://anderseiler.com" target="_blank" rel="noopener">Anders' nyhedsbrev</a><a class="cta-btn" href="https://confirmsubscription.com/h/t/6839F4FAFC2AB8F0" target="_blank" rel="noopener">Bo's nyhedsbrev</a></div>
+    <section class="newsletter-cta" aria-label="Nyhedsbrev">
+      <div><div class="cta-title">Mine tanker, før de bliver til episoder.</div><p class="cta-desc">Få mine noter om iværksætteri, software og business direkte i indbakken.</p></div>
+      <div class="cta-buttons"><a class="cta-btn" href="<?= htmlspecialchars($hosts[0]['newsletter']) ?>" target="_blank" rel="noopener">Tilmeld dig →</a></div>
     </section>
     <?php if (!$is_host): ?>
-    <section class="hosts-bio" id="vaerterne" aria-labelledby="hosts-title">
-      <h2 id="hosts-title" class="hosts-heading">Værterne bag mikrofonerne</h2>
+    <section class="hosts-bio" id="om-bo" aria-labelledby="hosts-title">
+      <div class="about-photo"><img src="<?= htmlspecialchars($hosts[0]['image']) ?>" width="1200" height="1200" loading="lazy" alt="Bo Møller på scenen ved Laravel Live i København"><span class="photo-credit">Billedet er taget af fotografen til Laravel Live i København · august 2026</span></div>
+      <div class="about-copy"><div class="eyebrow">Lidt om mig</div><h2 id="hosts-title" class="hosts-heading">Hej, jeg er Bo.</h2>
       <?php foreach ($hosts as $host): ?>
       <article class="host">
-        <div class="host-card-head"><a href="<?= '/vaert/' . htmlspecialchars($host['slug']) ?>" rel="author" aria-label="Læs profilen for <?= htmlspecialchars($host['name']) ?>"><img class="host-card-portrait" src="<?= htmlspecialchars($host['image']) ?>" width="<?= (int)$host['image_width'] ?>" height="<?= (int)$host['image_height'] ?>" loading="lazy" alt=""></a><div><div class="host-name"><a href="<?= '/vaert/' . htmlspecialchars($host['slug']) ?>" rel="author"><?= htmlspecialchars($host['name']) ?></a></div><div class="host-role-small"><?= htmlspecialchars($host['role']) ?></div></div></div>
         <div class="host-desc"><?= htmlspecialchars($host['long_bio']) ?></div>
-        <div class="host-companies">Tilknyttet: <?php foreach ($host['companies'] as $idx => $company): ?><?= $idx ? ', ' : '' ?><a href="<?= htmlspecialchars($company['url']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($company['name']) ?></a><?php endforeach; ?>.</div>
-        <a class="host-profile-link" href="<?= '/vaert/' . htmlspecialchars($host['slug']) ?>" rel="author">Læs hele profilen →</a>
+        <div class="host-elsewhere">
+          <p>Jeg er også vært på <a href="https://saaskøbmænd.dk" target="_blank" rel="noopener">SaaS Købmænd</a>, en populær iværksætterpodcast, der udkommer ugentligt.</p>
+          <p>Jeg investerer i virksomheder og ejer blandt andet <a href="https://langsom.com" target="_blank" rel="noopener">Langsom.com</a>. Du kan læse mere om mig og mine projekter på <a href="https://bandeja.org" target="_blank" rel="me noopener">Bandeja.org</a> og <a href="https://wmo.dk" target="_blank" rel="noopener">wmo.dk</a>.</p>
+        </div>
+        <a class="host-profile-link" href="<?= '/vaert/' . htmlspecialchars($host['slug']) ?>" rel="author">Mere om mig →</a>
       </article>
       <?php endforeach; ?>
+      </div>
     </section>
     <?php endif; ?>
+    <section class="ai-disclosure" aria-labelledby="ai-disclosure-title">
+      <div class="ai-disclosure-label"><span aria-hidden="true">bo@showet:~$</span> disclose --ai</div>
+      <div class="ai-disclosure-copy">
+        <h2 id="ai-disclosure-title">Jeg bruger AI. Helt åbent.</h2>
+        <p>Jeg har brugt AI til at bygge og deploye hele siden og til at skrive alle teksterne. Men intet er sat på autopilot: Jeg, Bo Møller, har orkestreret det hele, valgt retningen og godkendt resultatet.</p>
+        <p>Alle videoer er mig, der taler - ikke AI. Endnu :-)</p>
+      </div>
+      <div class="ai-disclosure-status" aria-label="Menneske i processen"><span aria-hidden="true">●</span> human_in_the_loop = true</div>
+    </section>
   <?php endif; ?>
   </main>
   <footer class="site-footer">
-    <div><strong>SaaS Købmænd</strong><span>En dansk podcast om SaaS, iværksætteri og forretning.</span></div>
-    <nav aria-label="Praktiske links"><?php foreach ($platforms as $name => $url): ?><a href="<?= htmlspecialchars($url) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($name) ?></a><?php endforeach; ?><a href="<?= htmlspecialchars($rss_url) ?>">RSS-feed</a><a href="/sitemap.xml">Sitemap</a><a href="/llms.txt">llms.txt</a><a href="https://app.pingpuffin.com/status/index.php?s=8vvWAEH3Uv">Driftsinformation</a></nav>
+    <div><strong><?= htmlspecialchars($site_name) ?></strong><span>Mine tanker på farten om business, software og livet.</span></div>
+    <nav aria-label="Praktiske links"><?php foreach ($platforms as $name => $url): ?><a href="<?= htmlspecialchars($url) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($name) ?></a><?php endforeach; ?><a href="<?= htmlspecialchars($public_rss_url) ?>">RSS-feed</a><a href="/sitemap.xml">Sitemap</a><a href="/llms.txt">llms.txt</a></nav>
   </footer>
 </div>
 
-<?php if (false): // Gammelt view beholdes midlertidigt som reference, men renderes ikke. ?>
-<div class="container <?= ($is_single ? 'single' : '') ?>">
-
-    <?php if (!$is_single && !$is_404): ?>
-        <?php if (!empty($cover_image)): ?>
-            <img src="<?= htmlspecialchars($cover_image) ?>" class="podcast-cover" width="160" height="160" decoding="async" alt="SaaS Købmænd podcast cover">
-        <?php endif; ?>
-    <?php endif; ?>
-
-    <?php if ($is_single && !$is_404): ?>
-        <nav class="crumbs" aria-label="Brødkrummesti">
-            <a href="/">Forside</a>
-            <span aria-hidden="true">›</span>
-            <span>Episode <?= (int)$single['ep_no'] ?></span>
-        </nav>
-        <h1><?= htmlspecialchars($single['title']) ?></h1>
-        <div class="meta">
-            <?= htmlspecialchars($single['date_human']) ?> · Episode <?= (int)$single['ep_no'] ?>
-            <?php if (!empty($single['duration'])): ?> · ⏱ <?= htmlspecialchars($single['duration']) ?><?php endif; ?>
-        </div>
-
-        <?php $share_link = rtrim($short_url, '/') . '/e/' . (int)$single['ep_no']; ?>
-        <div class="share-row">
-            <span>Del:</span>
-            <span class="share-url" id="share-url"><?= htmlspecialchars(preg_replace('#^https?://#', '', $share_link)) ?></span>
-            <button type="button" class="copy-btn" data-link="<?= htmlspecialchars($share_link) ?>"
-                    onclick="copyShareLink(this)">Kopiér link</button>
-        </div>
-
-        <div class="player-row">
-          <?php if (!empty($single['audio_url'])): ?>
-              <audio controls preload="none">
-                  <source src="<?= htmlspecialchars($single['audio_url']) ?>" type="audio/mpeg">
-                  Din browser understøtter ikke afspilning.
-              </audio>
-          <?php else: ?>
-              <div style="flex:1;color:#666;">Ingen audio fundet i feedet.</div>
-          <?php endif; ?>
-
-          <nav class="platform-links" aria-label="Lyt på platforme">
-            <?php foreach ($platforms as $name => $url): ?>
-            <a class="pill" href="<?= htmlspecialchars($url) ?>" target="_blank" rel="noopener">
-              <span class="dot" aria-hidden="true"></span> <?= htmlspecialchars(strtok($name, ' ')) ?>
-            </a>
-            <?php endforeach; ?>
-          </nav>
-        </div>
-
-        <?php $hero = !empty($single['image']) ? $single['image'] : $cover_image; ?>
-        <?php if (!empty($hero)): ?>
-          <div class="episode-hero-wrap">
-            <img src="<?= htmlspecialchars($hero) ?>" class="episode-hero" loading="lazy" decoding="async" width="600" height="600" alt="Cover for episode <?= (int)$single['ep_no'] ?>: <?= htmlspecialchars($single['title']) ?>">
-          </div>
-        <?php endif; ?>
-
-        <div class="content">
-            <?php
-              $has_html = $single['content'] !== '' && $single['content'] !== strip_tags($single['content']);
-              if ($has_html) {
-                  echo sanitize_episode_html($single['content']);
-              } else {
-                  // Ren tekst: afkod evt. entiteter først, så de ikke dobbelt-encodes
-                  $plain = html_entity_decode(trim($single['content']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                  echo nl2br(htmlspecialchars($plain));
-              }
-            ?>
-        </div>
-
-        <div class="nav-ep">
-            <?php if ($prev_link): ?>
-              <a class="nav-btn left" href="<?= $prev_link ?>"><?= htmlspecialchars($prev_label) ?></a>
-            <?php else: ?>
-              <span class="nav-btn left disabled">Ingen tidligere</span>
-            <?php endif; ?>
-            <?php if ($next_link): ?>
-              <a class="nav-btn right" href="<?= $next_link ?>"><?= htmlspecialchars($next_label) ?></a>
-            <?php else: ?>
-              <span class="nav-btn right disabled">Ingen næste</span>
-            <?php endif; ?>
-        </div>
-
-        <?php
-          // Relaterede episoder: de nyeste andre episoder (god intern linkbuilding)
-          $related = [];
-          foreach ($episodes as $rep) {
-              if ((int)$rep['ep_no'] === (int)$single['ep_no']) continue;
-              $related[] = $rep;
-              if (count($related) >= 4) break;
-          }
-        ?>
-        <?php if ($related): ?>
-        <section class="related" aria-label="Flere episoder">
-            <h2>Flere episoder</h2>
-            <?php foreach ($related as $rep): ?>
-            <a class="related-item" href="<?= '/episode/' . htmlspecialchars($rep['slug']) ?>">
-                <span class="related-no">Ep <?= (int)$rep['ep_no'] ?></span>
-                <span class="related-title"><?= htmlspecialchars($rep['title']) ?></span>
-            </a>
-            <?php endforeach; ?>
-        </section>
-        <?php endif; ?>
-
-        <!-- CTA -->
-        <div class="newsletter-cta">
-          <div class="cta-title">Tilmeld dig værternes nyhedsbreve om SaaS & forretning</div>
-          <div class="cta-buttons">
-            <a class="cta-btn" href="https://anderseiler.com" target="_blank" rel="noopener">Anders' nyhedsbrev</a>
-            <a class="cta-btn" href="https://confirmsubscription.com/h/t/6839F4FAFC2AB8F0" target="_blank" rel="noopener">Bo's nyhedsbrev</a>
-          </div>
-          <div class="cta-desc">Begge nyhedsbreve handler om SaaS, iværksætteri og forretning – direkte fra værterne bag podcasten.</div>
-        </div>
-
-        <!-- Bio -->
-        <div class="hosts-bio">
-          <div class="host">
-            <div class="host-name">Anders Eiler</div>
-            <div class="host-desc">Anders Eiler er SaaS-iværksætter og podcastvært. Han står bag <a href="https://herodesk.io" target="_blank" rel="noopener">Herodesk</a> og har sin egen side på <a href="https://anderseiler.com" target="_blank" rel="noopener">anderseiler.com</a>.<br/><br/><br/><a href="https://app.pingpuffin.com/status/index.php?s=8vvWAEH3Uv">Driftsinformation</a>.</div>
-          </div>
-          <div class="host">
-            <div class="host-name">Bo Møller</div>
-            <div class="host-desc">Bo Møller er serieiværksætter med fokus på SaaS. Han driver <a href="https://alunta.com" target="_blank">Alunta</a>, <a href="https://idguard.dk" target="_blank">idguard.dk</a>, <a href="https://anyhoa.com" target="_blank" rel="noopener">AnyHOA</a>, <a href="https://resos.com" target="_blank" rel="noopener">resOS</a>, <a href="https://pingpuffin.com" target="_blank" rel="noopener">PingPuffin</a>, <a href="https://octoreports.com" target="_blank" rel="noopener">Octoreports</a>, <a href="https://morningscore.io" target="_blank" rel="noopener">Morningscore</a> og <a href="https://boligforeningsweb.dk" target="_blank" rel="noopener">Boligforeningsweb</a>. Læs mere på <a href="https://bandeja.org" target="_blank" rel="noopener">bandeja.org</a>.</div>
-          </div>
-        </div>
-
-    <?php elseif ($is_404): ?>
-        <div class="http404">
-            <div class="oops">404</div>
-            <h1>Siden findes ikke</h1>
-            <p class="joke">
-                Det ligner en klassisk SaaS-fejl: <em>Feature not found</em> 🙈<br>
-                Maybe it’s on the <strong>Enterprise plan</strong>?
-            </p>
-            <a class="home-btn" href="/">← Til forsiden</a>
-            <div class="suggest">Eller prøv en af de nyeste episoder:</div>
-            <div class="suggest-list">
-                <?php
-                $max = min(5, count($episodes));
-                for ($i = 0; $i < $max; $i++):
-                    $ep = $episodes[$i];
-                ?>
-                    <a href="<?= '/episode/' . htmlspecialchars($ep['slug']) ?>">Ep <?= (int)$ep['ep_no'] ?>: <?= htmlspecialchars(mb_substr($ep['title'], 0, 40, 'UTF-8')) ?><?= (mb_strlen($ep['title'],'UTF-8')>40 ? '…' : '') ?></a>
-                <?php endfor; ?>
-            </div>
-        </div>
-
-    <?php else: ?>
-        <h1>SaaS Købmænd Podcast</h1>
-        <div class="desc">Alle episoder fra SaaS Købmænd. Udkommer (næsten) hver mandag.</div>
-
-        <!-- ✅ Forside-links tilbage til præcis original markup (ingen inline style) -->
-        <div class="links">
-            <?php foreach ($platforms as $name => $url): ?>
-            <a class="plink" href="<?= htmlspecialchars($url) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($name) ?></a>
-            <?php endforeach; ?>
-        </div>
-
-        <?php foreach ($episodes as $ep): ?>
-        <div class="episode">
-            <a class="episode-card" href="<?= '/episode/' . htmlspecialchars($ep['slug']) ?>">
-                <h2 class="episode-title"><?= htmlspecialchars($ep['title']) ?></h2>
-                <div class="episode-date">
-                    Episode <?= (int)$ep['ep_no'] ?> · <?= htmlspecialchars($ep['date_human']) ?>
-                    <?php if (!empty($ep['duration'])): ?> · ⏱ <?= htmlspecialchars($ep['duration']) ?><?php endif; ?>
-                </div>
-                <div class="teaser">
-                    <?= htmlspecialchars(teaser($ep['content'], 110)) ?>
-                </div>
-            </a>
-        </div>
-        <?php endforeach; ?>
-
-        <!-- CTA -->
-        <div class="newsletter-cta">
-          <div class="cta-title">Tilmeld dig værternes nyhedsbreve om SaaS & forretning</div>
-          <div class="cta-buttons">
-            <a class="cta-btn" href="https://anderseiler.com" target="_blank" rel="noopener">Anders' nyhedsbrev</a>
-            <a class="cta-btn" href="https://confirmsubscription.com/h/t/6839F4FAFC2AB8F0" target="_blank" rel="noopener">Bo's nyhedsbrev</a>
-          </div>
-          <div class="cta-desc">Begge nyhedsbreve handler om SaaS, iværksætteri og forretning – direkte fra værterne bag podcasten.</div>
-        </div>
-
-        <!-- Bio -->
-        <div class="hosts-bio">
-          <div class="host">
-            <div class="host-name">Anders Eiler</div>
-            <div class="host-desc">Anders Eiler er SaaS-iværksætter og podcastvært. Han står bag <a href="https://herodesk.io" target="_blank" rel="noopener">Herodesk</a> og har sin egen side på <a href="https://anderseiler.com" target="_blank" rel="noopener">anderseiler.com</a>.<br/><br/><br/><a href="https://app.pingpuffin.com/status/index.php?s=8vvWAEH3Uv">Driftsinformation</a>.</div>
-          </div>
-          <div class="host">
-            <div class="host-name">Bo Møller</div>
-            <div class="host-desc">Bo Møller er serieiværksætter med fokus på SaaS. Han driver <a href="https://alunta.com" target="_blank">Alunta</a>, <a href="https://idguard.dk" target="_blank">idguard.dk</a>, <a href="https://anyhoa.com" target="_blank" rel="noopener">AnyHOA</a>, <a href="https://resos.com" target="_blank" rel="noopener">resOS</a>, <a href="https://pingpuffin.com" target="_blank" rel="noopener">PingPuffin</a>, <a href="https://octoreports.com" target="_blank" rel="noopener">Octoreports</a>, <a href="https://morningscore.io" target="_blank" rel="noopener">Morningscore</a> og <a href="https://boligforeningsweb.dk" target="_blank" rel="noopener">Boligforeningsweb</a>. Læs mere på <a href="https://bandeja.org" target="_blank" rel="noopener">bandeja.org</a>.</div>
-          </div>
-        </div>
-    <?php endif; ?>
-</div>
-<?php endif; ?>
 
 <script>
 // Kopiér del-link. Bruger Clipboard API i secure context (HTTPS), ellers
