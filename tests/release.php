@@ -29,7 +29,9 @@ function check($condition, $message) {
 function request_path($path) {
     $context = stream_context_create(['http' => ['ignore_errors' => true, 'timeout' => 10, 'follow_location' => 0]]);
     $body = @file_get_contents(BASE_URL . $path, false, $context);
-    $headers = $http_response_header ?? [];
+    $headers = function_exists('http_get_last_response_headers')
+        ? (http_get_last_response_headers() ?? [])
+        : ($http_response_header ?? []);
     $status = 0;
     if (isset($headers[0]) && preg_match('/\s(\d{3})\s/', $headers[0], $match)) $status = (int)$match[1];
     return ['status' => $status, 'headers' => $headers, 'body' => $body === false ? '' : $body];

@@ -14,7 +14,9 @@ function synthetic_request($path) {
     global $base_url;
     $context = stream_context_create(['http' => ['ignore_errors' => true, 'timeout' => 10]]);
     $body = @file_get_contents($base_url . $path, false, $context);
-    $headers = isset($http_response_header) ? $http_response_header : [];
+    $headers = function_exists('http_get_last_response_headers')
+        ? (http_get_last_response_headers() ?? [])
+        : ($http_response_header ?? []);
     $status = 0;
     if (isset($headers[0]) && preg_match('/\s(\d{3})\s/', $headers[0], $match)) $status = (int)$match[1];
     return ['status' => $status, 'body' => $body === false ? '' : $body];

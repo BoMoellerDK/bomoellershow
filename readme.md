@@ -19,6 +19,8 @@ overskrives med `BOMOELLERSHOW_SITE_URL` og `BOMOELLERSHOW_SHORT_URL`.
 ## Lokal test
 
 Kræver PHP 7.4+ med `mbstring`, `SimpleXML` og `DOM`.
+Produktion kører PHP 8.5; brug samme version lokalt for at matche produktion.
+GitHub Actions tester PHP 7.4, 8.4 og 8.5, og deployment testes på PHP 8.5.
 
 ```sh
 bash tests/run-release.sh
