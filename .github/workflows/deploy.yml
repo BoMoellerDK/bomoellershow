@@ -31,6 +31,11 @@ jobs:
           extensions: mbstring, simplexml, dom
           coverage: none
 
+      # Regressionstesten forventer repoets faste RSS-snapshot med fire episoder.
+      # Kør den, før snapshot erstattes med live-feedet til deployment.
+      - name: Kør regressionstest før deployment
+        run: bash tests/run-release.sh
+
       - name: Opdatér seneste kendte RSS-feed
         shell: bash
         run: |
@@ -52,9 +57,6 @@ jobs:
           php -l public_html/index.php
           php -r '$x = @simplexml_load_file($argv[1]); if (!$x || count($x->channel->item) < 1) { fwrite(STDERR, "RSS-snapshot er ugyldigt.\n"); exit(1); }' data/podcast-rss-fallback.xml
           php -r '$c = json_decode(file_get_contents($argv[1]), true); $e = $c["episodes"] ?? []; $ids = array_column($e, "id"); if (count($e) < 1 || count(array_unique($ids)) !== count($e)) { fwrite(STDERR, "YouTube-kataloget skal have mindst ét unikt match.\n"); exit(1); } foreach ($ids as $id) if (!preg_match("/^[A-Za-z0-9_-]{11}$/", $id)) exit(1);' data/youtube-catalog-seed.json
-
-      - name: Kør regressionstest før deployment
-        run: bash tests/run-release.sh
 
       - name: Upload til Simply.com via FTPS
         uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.4.0
