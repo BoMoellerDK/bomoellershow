@@ -925,8 +925,8 @@ if ($is_single) {
     $og_image_width = (int)$host_profile['image_width'];
     $og_image_height = (int)$host_profile['image_height'];
 } elseif ($is_404) {
-    $page_title = '404 - Siden findes ikke · ' . $site_name;
-    $page_description = "Jeg kan ikke finde den side. Måske leder du efter en af mine podcast-episoder?";
+    $page_title = '404 - Bo er kørt ud ad en tangent · ' . $site_name;
+    $page_description = 'Siden findes ikke. Bo er vist kørt ud ad en tangent om software, business og livet. Find tilbage til podcasten her.';
     // $page_url bevares som forsiden (default) – en 404 skal ikke kanonisere til sig selv.
 }
 $social_title = $social_title ?: $page_title;
@@ -1333,10 +1333,12 @@ if ($ld_graph) {
     </style>
     <?php endif; ?>
     <link rel="stylesheet" href="/assets/site-v2.css?v=13">
+    <?php if ($is_404): ?><link rel="stylesheet" href="/assets/not-found.css?v=4"><?php endif; ?>
 
 </head>
 <body>
 <div class="site-shell">
+  <?php if (!$is_404): ?>
   <header class="site-header">
     <a class="brand" href="/" aria-label="<?= htmlspecialchars($site_name) ?> - forside">
       <img class="brand-mark" src="/assets/icons/avatar-96.webp" width="42" height="42" alt="">
@@ -1348,8 +1350,9 @@ if ($ld_graph) {
       <a class="listen-nav" href="<?= htmlspecialchars($platforms['Spotify']) ?>" target="_blank" rel="noopener" aria-label="Lyt til Bo Møller showet på Spotify">Lyt <span aria-hidden="true">↗</span></a>
     </nav>
   </header>
+  <?php endif; ?>
 
-  <main class="container <?= $is_single ? 'single' : ($is_host ? 'host-page' : '') ?>">
+  <main class="container <?= $is_single ? 'single' : ($is_host ? 'host-page' : ($is_404 ? 'lost-page' : '')) ?>">
   <?php if (!$is_single && !$is_host && !$is_404): ?>
     <?php $latest = $episodes[0] ?? null; ?>
     <section class="home-hero" aria-labelledby="show-title">
@@ -1539,13 +1542,65 @@ if ($ld_graph) {
     </article>
 
   <?php else: ?>
-    <div class="http404">
-      <div class="oops">404</div><h1>Jeg kan ikke finde siden</h1>
-      <p class="joke">Jeg er vist kørt ned ad den forkerte afkørsel.</p>
-      <a class="home-btn" href="/">Tilbage til forsiden</a>
-      <div class="suggest">Eller prøv en af de nyeste episoder:</div>
-      <div class="suggest-list"><?php foreach (array_slice($episodes, 0, 5) as $ep): ?><a href="<?= '/episode/' . htmlspecialchars($ep['slug']) ?>">Ep. <?= (int)$ep['ep_no'] ?>: <?= htmlspecialchars(teaser($ep['title'], 42)) ?></a><?php endforeach; ?></div>
-    </div>
+    <section class="lost-episode" aria-labelledby="lost-title">
+      <div class="lost-grid">
+        <div class="lost-copy">
+          <p class="eyebrow">404 · Side ikke fundet · <?= htmlspecialchars(parse_url($site_url, PHP_URL_HOST), ENT_QUOTES, 'UTF-8') ?></p>
+          <h1 id="lost-title">404: Bo er kørt ud<br><em>ad en tangent.</em></h1>
+          <p class="lost-description">Det startede med et link. Så fik Bo en idé til en virksomhed. Siden? Den har han glemt.</p>
+          <div class="lost-actions">
+            <a class="button button-primary" href="/"><span aria-hidden="true">←</span> Tilbage på sporet</a>
+          </div>
+        </div>
+        <div class="lost-art" aria-hidden="true">
+          <span class="lost-number">404</span>
+          <svg class="lost-tape" viewBox="0 0 560 390" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M199 255C175 302 96 272 104 321C112 366 246 350 237 313C227 272 168 312 194 350C220 389 319 358 351 367" stroke="#b7ff64" stroke-width="2" stroke-linecap="round"/>
+            <path d="M347 362l6 6-8 4" stroke="#b7ff64" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <g transform="translate(111 101) rotate(-9 169 103)">
+              <rect x="3" y="10" width="338" height="208" rx="16" fill="#000" opacity=".5"/>
+              <rect x="0.75" y="0.75" width="336.5" height="206.5" rx="13" fill="#171b17" stroke="#535b4d" stroke-width="1.5"/>
+              <rect x="9" y="9" width="320" height="190" rx="7" stroke="#2d342b"/>
+              <rect x="24" y="22" width="290" height="130" rx="4" fill="#c2d3aa"/>
+              <path d="M24 65h290M24 70h290" stroke="#8b9c75"/>
+              <text x="38" y="42" fill="#263020" font-family="monospace" font-size="10" letter-spacing="1.3">BO MØLLER SHOWET</text>
+              <text x="298" y="42" fill="#263020" font-family="monospace" font-size="10" text-anchor="end">SIDE B</text>
+              <text x="38" y="59" fill="#263020" font-family="monospace" font-size="8" letter-spacing="1">AFSNIT 404 · DEN MED DEN RØDE TRÅD</text>
+              <rect x="49" y="83" width="240" height="53" rx="26.5" fill="#20251e" stroke="#788668"/>
+              <path d="M101 90h137v39H101z" fill="#0e120d"/>
+              <path d="M139 95v29m9-29v29m9-29v29m9-29v29m9-29v29m9-29v29m9-29v29m9-29v29" stroke="#4c5545" stroke-width="2"/>
+              <g>
+                <circle cx="81" cy="110" r="22" fill="#b9c8a5"/>
+                <circle cx="81" cy="110" r="14" fill="#1b2119" stroke="#7f8e6d" stroke-width="3" stroke-dasharray="5 7"/>
+                <circle cx="81" cy="110" r="5" fill="#b9c8a5"/>
+              </g>
+              <g>
+                <circle cx="257" cy="110" r="22" fill="#b9c8a5"/>
+                <circle cx="257" cy="110" r="14" fill="#1b2119" stroke="#7f8e6d" stroke-width="3" stroke-dasharray="5 7"/>
+                <circle cx="257" cy="110" r="5" fill="#b9c8a5"/>
+              </g>
+              <path d="M109 166h120l20 33H89z" fill="#11150f" stroke="#394131"/>
+              <circle cx="125" cy="184" r="5" fill="#080b07" stroke="#535b4d"/>
+              <circle cx="213" cy="184" r="5" fill="#080b07" stroke="#535b4d"/>
+              <path d="M148 180h42v14h-42z" fill="#080b07"/>
+              <g stroke="#68715f" stroke-linecap="round">
+                <circle cx="16" cy="16" r="3"/><path d="m14 18 4-4"/>
+                <circle cx="322" cy="16" r="3"/><path d="m320 18 4-4"/>
+                <circle cx="16" cy="192" r="3"/><path d="m14 194 4-4"/>
+                <circle cx="322" cy="192" r="3"/><path d="m320 194 4-4"/>
+              </g>
+              <text x="28" y="180" fill="#87937b" font-family="monospace" font-size="8">STEREO</text>
+              <text x="310" y="180" fill="#87937b" font-family="monospace" font-size="8" text-anchor="end">∞ MIN</text>
+            </g>
+            <g transform="translate(399 254) rotate(7)">
+              <rect width="113" height="28" fill="#b7ff64"/>
+              <text x="56.5" y="18" text-anchor="middle" fill="#17200f" font-family="monospace" font-size="10" letter-spacing="1">TABTE TRÅDEN</text>
+            </g>
+            <text x="366" y="368" fill="#9b9e99" font-family="Georgia, serif" font-style="italic" font-size="16">den var her lige …</text>
+          </svg>
+        </div>
+      </div>
+    </section>
   <?php endif; ?>
 
   <?php if (!$is_404): ?>
@@ -1588,10 +1643,12 @@ if ($ld_graph) {
     <?php endif; ?>
   <?php endif; ?>
   </main>
+  <?php if (!$is_404): ?>
   <footer class="site-footer">
     <div><strong><?= htmlspecialchars($site_name) ?></strong><span>Mine tanker på farten om business, software og livet.</span></div>
     <nav aria-label="Praktiske links"><?php foreach ($platforms as $name => $url): ?><a href="<?= htmlspecialchars($url) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($name) ?></a><?php endforeach; ?><a href="<?= htmlspecialchars($public_rss_url) ?>">RSS-feed</a><a href="/sitemap.xml">Sitemap</a><a href="/llms.txt">llms.txt</a></nav>
   </footer>
+  <?php endif; ?>
 </div>
 
 
